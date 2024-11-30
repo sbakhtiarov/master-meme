@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Master Meme"
 include(":app")
 include(":common-android")
+include(":feature-memes-list")

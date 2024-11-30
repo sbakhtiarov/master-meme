@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="your_memes">Your memes</string>
+    <string name="sort_favourites_first">Favourites first</string>
+    <string name="sort_newest_first">Newest first</string>
+</resources>
