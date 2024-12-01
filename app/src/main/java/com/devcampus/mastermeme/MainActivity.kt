@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
-import com.devcampus.memes_list.ui.main.MemesScreen
+import com.devcampus.memes_list.ui.compose.MemesScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

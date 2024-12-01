@@ -1,4 +1,4 @@
-package com.devcampus.memes_list.ui.main
+package com.devcampus.memes_list.ui.compose
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 internal interface MemesRepository {
     fun getMemes(): Flow<List<MemeFile>>
+    suspend fun delete(memes: List<MemeFile>): Result<Unit>
 }

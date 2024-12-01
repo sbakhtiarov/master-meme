@@ -4,9 +4,11 @@ import android.content.Context
 import com.devcampus.memes_list.domain.MemesRepository
 import com.devcampus.memes_list.domain.model.MemeFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -16,32 +18,43 @@ internal class MemesRepositoryImpl @Inject constructor(
 
     private companion object {
         private const val MEMES_FOLDER = "memes"
-        private const val MEMES_IMAGE_EXT = ".jpg"
+        private val MEMES_IMAGE_EXT = listOf(".jpg", ".png")
     }
 
     override fun getMemes(): Flow<List<MemeFile>> =
         callbackFlow {
 
-            val memesDirectory = File(context.getExternalFilesDir(null), MEMES_FOLDER)
+            val observer = withContext(Dispatchers.IO) {
 
-            if (!memesDirectory.exists()) {
-                memesDirectory.mkdir()
-            }
+                val memesDirectory = File(context.getExternalFilesDir(null), MEMES_FOLDER)
 
-            send(memesDirectory.allMemeFiles())
+                if (!memesDirectory.exists()) {
+                    memesDirectory.mkdir()
+                }
 
-            val observer = memesDirectory.startWatching {
-                trySend(memesDirectory.allMemeFiles())
+                send(memesDirectory.allMemeFiles())
+
+                memesDirectory.startWatching {
+                    trySend(memesDirectory.allMemeFiles())
+                }
             }
 
             awaitClose { observer.stopWatching() }
         }
 
+    override suspend fun delete(memes: List<MemeFile>): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
+            memes.map { File(it.path) }.onEach { file ->
+                file.delete()
+            }
+        }
+    }
+
     private fun File.allMemeFiles() =
-        listFiles { _, path ->
-            path?.endsWith(MEMES_IMAGE_EXT) ?: false
-        }?.map {
-            MemeFile(it.absolutePath)
-        } ?: emptyList()
+        listFiles { _, path -> path?.isImagePath() ?: false }
+            ?.map { MemeFile(it.absolutePath) } ?: emptyList()
+
+    private fun String.isImagePath(): Boolean =
+        MEMES_IMAGE_EXT.any { endsWith(it) }
 }
 

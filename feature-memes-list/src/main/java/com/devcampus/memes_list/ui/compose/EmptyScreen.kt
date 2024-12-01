@@ -1,4 +1,4 @@
-package com.devcampus.memes_list.ui.main
+package com.devcampus.memes_list.ui.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
