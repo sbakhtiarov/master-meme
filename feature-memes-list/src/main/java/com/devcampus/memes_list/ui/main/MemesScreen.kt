@@ -15,12 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.devcampus.common_android.ui.theme.SurfaceContainer
 import com.devcampus.memes_list.R
+import com.devcampus.memes_list.ui.MemeListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemesScreen() {
+
+    val viewModel: MemeListViewModel = hiltViewModel()
+
     Scaffold(
         topBar = {
             TopAppBar(
