@@ -70,6 +70,7 @@ fun MemesScreen() {
                         selection = state.selection,
                         onItemClick = { sendIntent(Intent.OnMemeClick(it)) },
                         onItemLongClick = { sendIntent(Intent.OnMemeLongClick(it)) },
+                        onItemFavouriteClick = { sendIntent(Intent.OnMemeFavouriteClick(it)) },
                     )
 
                 EmptyState -> EmptyScreen()

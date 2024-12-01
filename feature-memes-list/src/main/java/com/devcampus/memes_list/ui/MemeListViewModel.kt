@@ -4,7 +4,10 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.devcampus.memes_list.domain.FavouriteMemesRepository
+import com.devcampus.memes_list.domain.GetMemesUseCase
 import com.devcampus.memes_list.domain.MemesRepository
+import com.devcampus.memes_list.domain.model.Meme
 import com.devcampus.memes_list.domain.model.MemeFile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +23,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class MemeListViewModel @Inject constructor(
-    private val memesRepository: MemesRepository
+    private val getMemesUseCase: GetMemesUseCase,
+    private val memesRepository: MemesRepository,
+    private val favouritesRepository: FavouriteMemesRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ViewState>(Loading)
@@ -36,13 +41,23 @@ internal class MemeListViewModel @Inject constructor(
     private fun handleIntents() {
         intents.onEach { intent ->
             when (intent) {
-                is Intent.OnMemeClick -> handleMemeClick(intent.memeFile)
-                is Intent.OnMemeLongClick -> handleMemeLongClick(intent.memeFile)
+                is Intent.OnMemeClick -> handleMemeClick(intent.meme)
+                is Intent.OnMemeLongClick -> handleMemeLongClick(intent.meme)
                 Intent.OnBackPress -> handleBackPress()
                 Intent.OnSelectionDelete -> handleDeleteSelection()
                 Intent.OnSelectionShare -> handleShareSelection()
+                is Intent.OnMemeFavouriteClick -> handleOnFavouriteClick(intent.meme)
             }
         }.launchIn(viewModelScope)
+    }
+
+    private fun handleOnFavouriteClick(meme: Meme) {
+        viewModelScope.launch {
+            favouritesRepository.setFavourite(
+                MemeFile(meme.path),
+                !meme.isFavourite
+            )
+        }
     }
 
     private fun handleShareSelection() {
@@ -52,7 +67,7 @@ internal class MemeListViewModel @Inject constructor(
     private fun handleDeleteSelection() {
         (_state.value as? DataState)?.selection?.let { selection ->
             viewModelScope.launch {
-                memesRepository.delete(selection)
+                memesRepository.delete(selection.map { MemeFile(it.path) })
                     .onSuccess {
                         updateState<DataState> { copy(selection = null) }
                     }
@@ -70,13 +85,13 @@ internal class MemeListViewModel @Inject constructor(
         }
     }
 
-    private fun handleMemeClick(memeFile: MemeFile) {
+    private fun handleMemeClick(meme: Meme) {
         (_state.value as? DataState)?.selection?.let { selection ->
             updateState<DataState> {
-                val newSelection = if (selection.contains(memeFile)) {
-                    (selection - memeFile).ifEmpty { null }
+                val newSelection = if (selection.contains(meme)) {
+                    (selection - meme).ifEmpty { null }
                 } else {
-                    selection + memeFile
+                    selection + meme
                 }
 
                 copy(selection = newSelection)
@@ -84,12 +99,12 @@ internal class MemeListViewModel @Inject constructor(
         }
     }
 
-    private fun handleMemeLongClick(memeFile: MemeFile) {
+    private fun handleMemeLongClick(meme: Meme) {
         val viewState = _state.value as? DataState
 
         if (viewState?.selection == null) {
             updateState<DataState> {
-                copy(selection = listOf(memeFile))
+                copy(selection = listOf(meme))
             }
         }
     }
@@ -101,7 +116,7 @@ internal class MemeListViewModel @Inject constructor(
     }
 
     private fun loadMemes() {
-        memesRepository.getMemes()
+        getMemesUseCase.getMemes()
             .onEach { memes ->
                 _state.update {
                     if (memes.isEmpty()) {
@@ -134,13 +149,14 @@ data object EmptyState : ViewState
 
 @Immutable
 internal data class DataState(
-    val memes: List<MemeFile> = emptyList(),
-    val selection: List<MemeFile>? = null,
+    val memes: List<Meme> = emptyList(),
+    val selection: List<Meme>? = null,
 ) : ViewState
 
 internal sealed interface Intent {
-    data class OnMemeClick(val memeFile: MemeFile) : Intent
-    data class OnMemeLongClick(val memeFile: MemeFile) : Intent
+    data class OnMemeClick(val meme: Meme) : Intent
+    data class OnMemeLongClick(val meme: Meme) : Intent
+    data class OnMemeFavouriteClick(val meme: Meme) : Intent
     data object OnBackPress : Intent
     data object OnSelectionShare : Intent
     data object OnSelectionDelete : Intent

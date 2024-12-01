@@ -16,4 +16,4 @@ val Surface = Color(0xFF141218)
 val SurfaceContainer = Color(0xFF1D1B20)
 val TextOutline = Color(0xFF79747E)
 
-val ScrimColorStart = Color(0xEE1D1B20)
+val ScrimColorStart = Color(0xE61D1B20)

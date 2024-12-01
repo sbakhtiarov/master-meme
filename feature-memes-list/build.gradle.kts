@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
@@ -50,12 +51,15 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.kotlinx.serialization)
 
     implementation(libs.coil)
 
     implementation(libs.android.hilt)
     implementation(libs.android.hilt.navigation)
     kapt(libs.android.hilt.compiler)
+
+    implementation(libs.datastore.preferences)
 
     debugImplementation(libs.androidx.ui.tooling)
 }

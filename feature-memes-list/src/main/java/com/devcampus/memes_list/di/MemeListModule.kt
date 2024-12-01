@@ -1,6 +1,8 @@
 package com.devcampus.memes_list.di
 
+import com.devcampus.memes_list.data.FavouriteMemesRepositoryImpl
 import com.devcampus.memes_list.data.MemesRepositoryImpl
+import com.devcampus.memes_list.domain.FavouriteMemesRepository
 import com.devcampus.memes_list.domain.MemesRepository
 import dagger.Binds
 import dagger.Module
@@ -13,5 +15,10 @@ abstract class MemeListModule {
 
     @Binds
     internal abstract fun bindMemeRepository(impl: MemesRepositoryImpl): MemesRepository
+
+    @Binds
+    internal abstract fun bindFavouritesRepository(
+        impl: FavouriteMemesRepositoryImpl
+    ): FavouriteMemesRepository
 
 }

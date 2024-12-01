@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
@@ -26,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -43,24 +46,26 @@ import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.common_android.ui.theme.Primary
 import com.devcampus.common_android.ui.theme.ScrimColorStart
 import com.devcampus.memes_list.R
-import com.devcampus.memes_list.domain.model.MemeFile
+import com.devcampus.memes_list.domain.model.Meme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun MemeGridItem(
-    meme: MemeFile,
+    meme: Meme,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onFavouriteClick: () -> Unit,
     isSelected: () -> Boolean?,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .aspectRatio(1f)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             )
-            .aspectRatio(1f)
     ) {
 
         val context = LocalContext.current
@@ -81,12 +86,12 @@ internal fun MemeGridItem(
                     val selectionGradient = Brush.radialGradient(
                         colors = listOf(ScrimColorStart, Color.Transparent),
                         center = Offset(size.width, 0f),
-                        radius = size.width / 3f,
+                        radius = size.width / 2f,
                     )
                     val favouriteGradient = Brush.radialGradient(
                         colors = listOf(ScrimColorStart, Color.Transparent),
                         center = Offset(size.width, size.height),
-                        radius = size.width / 3f,
+                        radius = size.width / 2f,
                     )
                     onDrawWithContent {
                         drawContent()
@@ -132,7 +137,15 @@ internal fun MemeGridItem(
             if (isInSelectionMode) {
                 IconPlaceholder()
             } else {
-                IconFavoriteOutline()
+                if (meme.isFavourite) {
+                    IconFavoriteFilled(
+                        Modifier.clickable { onFavouriteClick() }
+                    )
+                } else {
+                    IconFavoriteOutline(
+                        Modifier.clickable { onFavouriteClick() }
+                    )
+                }
             }
         }
 
@@ -141,7 +154,9 @@ internal fun MemeGridItem(
 
 @Composable
 private fun IconPlaceholder() {
-    Box(modifier = Modifier.padding(14.dp).size(20.dp),)
+    Box(modifier = Modifier
+        .padding(14.dp)
+        .size(20.dp),)
 }
 
 @Composable
@@ -172,9 +187,9 @@ private fun IconSelected() {
 }
 
 @Composable
-private fun IconFavoriteOutline() {
+private fun IconFavoriteOutline(modifier: Modifier = Modifier) {
     Icon(
-        modifier = Modifier
+        modifier = modifier
             .padding(12.dp)
             .size(24.dp),
         imageVector = Icons.Filled.FavoriteBorder,
@@ -184,9 +199,9 @@ private fun IconFavoriteOutline() {
 }
 
 @Composable
-private fun IconFavoriteFilled() {
+private fun IconFavoriteFilled(modifier: Modifier = Modifier) {
     Icon(
-        modifier = Modifier
+        modifier = modifier
             .padding(12.dp)
             .size(24.dp),
         imageVector = Icons.Filled.Favorite,
@@ -201,11 +216,14 @@ private fun MemeGridItemPreview() {
     MasterMemeTheme {
         Box(modifier = Modifier.padding(22.dp)) {
             MemeGridItem(
-                meme = MemeFile(
-                    "android.resource://${LocalContext.current.packageName}/${R.drawable.memes_empty}"
+                meme = Meme(
+                    path = "android.resource://" +
+                            "${LocalContext.current.packageName}/${R.drawable.memes_empty}",
+                    isFavourite = false
                 ),
                 onClick = {},
                 onLongClick = {},
+                onFavouriteClick = {},
                 isSelected = { false },
             )
         }

@@ -8,14 +8,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.devcampus.memes_list.domain.model.MemeFile
+import com.devcampus.memes_list.domain.model.Meme
 
 @Composable
 internal fun MemeContentScreen(
-    memes: List<MemeFile>,
-    selection: List<MemeFile>?,
-    onItemClick: (MemeFile) -> Unit,
-    onItemLongClick: (MemeFile) -> Unit,
+    memes: List<Meme>,
+    selection: List<Meme>?,
+    onItemClick: (Meme) -> Unit,
+    onItemLongClick: (Meme) -> Unit,
+    onItemFavouriteClick: (Meme) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -33,6 +34,7 @@ internal fun MemeContentScreen(
                 isSelected = { selection?.contains(meme) },
                 onClick = { onItemClick(meme) },
                 onLongClick = { onItemLongClick(meme) },
+                onFavouriteClick = { onItemFavouriteClick(meme) }
             )
         }
     }
