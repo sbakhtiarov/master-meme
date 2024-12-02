@@ -10,6 +10,8 @@ import com.devcampus.memes_list.domain.MemesRepository
 import com.devcampus.memes_list.domain.model.Meme
 import com.devcampus.memes_list.domain.model.MemeFile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +36,12 @@ internal class MemeListViewModel @Inject constructor(
 
     private val intents = MutableSharedFlow<Intent>()
 
+    private val _actions = Channel<Action>(
+        capacity = Channel.BUFFERED,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val actions = _actions.receiveAsFlow()
+
     init {
         handleIntents()
         loadMemes()
@@ -43,10 +52,11 @@ internal class MemeListViewModel @Inject constructor(
             when (intent) {
                 is Intent.OnMemeClick -> handleMemeClick(intent.meme)
                 is Intent.OnMemeLongClick -> handleMemeLongClick(intent.meme)
-                Intent.OnBackPress -> handleBackPress()
-                Intent.OnSelectionDelete -> handleDeleteSelection()
-                Intent.OnSelectionShare -> handleShareSelection()
+                is Intent.OnBackPress -> handleBackPress()
+                is Intent.OnSelectionDelete -> sendAction(ShowDeletionConfirmation)
+                is Intent.OnSelectionShare -> handleShareSelection()
                 is Intent.OnMemeFavouriteClick -> handleOnFavouriteClick(intent.meme)
+                is Intent.OnDeleteConfirmed -> handleDeleteConfirmation()
             }
         }.launchIn(viewModelScope)
     }
@@ -64,7 +74,7 @@ internal class MemeListViewModel @Inject constructor(
 
     }
 
-    private fun handleDeleteSelection() {
+    private fun handleDeleteConfirmation() {
         (_state.value as? DataState)?.selection?.let { selection ->
             viewModelScope.launch {
                 memesRepository.delete(selection.map { MemeFile(it.path) })
@@ -72,8 +82,8 @@ internal class MemeListViewModel @Inject constructor(
                         updateState<DataState> { copy(selection = null) }
                     }
                     .onFailure { error ->
-                        // TODO: Show error message
                         Log.e("MemeListViewModel", "Failed to delete files", error)
+                        sendAction(ShowErrorMessage)
                     }
             }
         }
@@ -140,6 +150,10 @@ internal class MemeListViewModel @Inject constructor(
             }
         }
     }
+
+    private fun sendAction(action: Action) {
+        viewModelScope.launch { _actions.send(action) }
+    }
 }
 
 internal sealed interface ViewState
@@ -160,4 +174,9 @@ internal sealed interface Intent {
     data object OnBackPress : Intent
     data object OnSelectionShare : Intent
     data object OnSelectionDelete : Intent
+    data object OnDeleteConfirmed : Intent
 }
+
+internal sealed interface Action
+data object ShowErrorMessage : Action
+data object ShowDeletionConfirmation : Action
