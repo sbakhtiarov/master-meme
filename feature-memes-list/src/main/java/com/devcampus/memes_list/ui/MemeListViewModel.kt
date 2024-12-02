@@ -7,19 +7,23 @@ import androidx.lifecycle.viewModelScope
 import com.devcampus.memes_list.domain.FavouriteMemesRepository
 import com.devcampus.memes_list.domain.GetMemesUseCase
 import com.devcampus.memes_list.domain.MemesRepository
+import com.devcampus.memes_list.domain.SortModeRepository
 import com.devcampus.memes_list.domain.model.Meme
 import com.devcampus.memes_list.domain.model.MemeFile
+import com.devcampus.memes_list.domain.model.SortMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,6 +33,7 @@ internal class MemeListViewModel @Inject constructor(
     private val getMemesUseCase: GetMemesUseCase,
     private val memesRepository: MemesRepository,
     private val favouritesRepository: FavouriteMemesRepository,
+    private val sortModeRepository: SortModeRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ViewState>(Loading)
@@ -40,7 +45,11 @@ internal class MemeListViewModel @Inject constructor(
         capacity = Channel.BUFFERED,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
     val actions = _actions.receiveAsFlow()
+
+    val sortMode: StateFlow<SortMode> = sortModeRepository.getSortMode()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), SortMode.NEWEST_FIRST)
 
     init {
         handleIntents()
@@ -57,15 +66,22 @@ internal class MemeListViewModel @Inject constructor(
                 is Intent.OnSelectionShare -> handleShareSelection()
                 is Intent.OnMemeFavouriteClick -> handleOnFavouriteClick(intent.meme)
                 is Intent.OnDeleteConfirmed -> handleDeleteConfirmation()
+                is Intent.OnSortModeSelected -> handleSortModeSelection(intent.selection)
             }
         }.launchIn(viewModelScope)
+    }
+
+    private fun handleSortModeSelection(selection: Int) {
+        viewModelScope.launch {
+            sortModeRepository.setSortMode(SortMode.entries[selection])
+        }
     }
 
     private fun handleOnFavouriteClick(meme: Meme) {
         viewModelScope.launch {
             favouritesRepository.setFavourite(
-                MemeFile(meme.path),
-                !meme.isFavourite
+                memeFilePath = meme.path,
+                isFavourite = !meme.isFavourite
             )
         }
     }
@@ -178,6 +194,7 @@ internal sealed interface Intent {
     data object OnSelectionShare : Intent
     data object OnSelectionDelete : Intent
     data object OnDeleteConfirmed : Intent
+    data class OnSortModeSelected(val selection: Int) : Intent
 }
 
 internal sealed interface Action

@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.devcampus.memes_list.R
@@ -29,17 +28,19 @@ import com.devcampus.memes_list.ui.Error
 import com.devcampus.memes_list.ui.Intent
 import com.devcampus.memes_list.ui.Loading
 import com.devcampus.memes_list.ui.MemeListViewModel
+import com.devcampus.memes_list.ui.MemeShare
 import com.devcampus.memes_list.ui.Share
 import com.devcampus.memes_list.ui.ShowDeletionConfirmation
 import com.devcampus.memes_list.ui.ShowErrorMessage
 import kotlinx.coroutines.flow.collectLatest
-import java.io.File
 
 @Composable
 fun MemesScreen() {
 
     val viewModel: MemeListViewModel = hiltViewModel()
     val viewState by viewModel.state.collectAsStateWithLifecycle()
+    val sortMode by viewModel.sortMode.collectAsStateWithLifecycle()
+
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
 
     val context = LocalContext.current
@@ -62,7 +63,10 @@ fun MemesScreen() {
                         onDelete = { sendIntent(Intent.OnSelectionDelete) },
                     )
                 } else {
-                    DefaultAppBar()
+                    DefaultAppBar(
+                        sortModeSelection = sortMode.ordinal,
+                        onSortModeSelected = { sendIntent(Intent.OnSortModeSelected(it)) }
+                    )
                 }
             }
         },
@@ -124,24 +128,7 @@ fun MemesScreen() {
 }
 
 private fun showShareDialog(context: Context, paths: List<String>) {
-    val shareIntent = android.content.Intent().apply {
-        action = android.content.Intent.ACTION_SEND_MULTIPLE
-        putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, ArrayList(
-            paths.mapNotNull {
-                try {
-                    FileProvider.getUriForFile(
-                        context,
-                        "com.devcampus.mastermeme.fileprovider",
-                        File(it)
-                    )
-                } catch (e: IllegalArgumentException) {
-                    null
-                }
-            }
-        ))
-        type = "image/jpg"
-    }
-    context.startActivity(android.content.Intent.createChooser(shareIntent, null))
+    MemeShare.showShareDialog(context, paths)
 }
 
 private fun showError(context: Context) {

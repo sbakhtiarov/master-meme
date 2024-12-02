@@ -22,7 +22,7 @@ object MemeShare {
                     }
                 }
             ))
-            type = "image/jpg"
+            type = "image/*"
         }
         context.startActivity(android.content.Intent.createChooser(shareIntent, null))
     }

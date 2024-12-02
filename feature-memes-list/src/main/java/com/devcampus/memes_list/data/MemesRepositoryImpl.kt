@@ -52,7 +52,12 @@ internal class MemesRepositoryImpl @Inject constructor(
 
     private fun File.allMemeFiles() =
         listFiles { _, path -> path?.isImagePath() ?: false }
-            ?.map { MemeFile(it.absolutePath) } ?: emptyList()
+            ?.map {
+                MemeFile(
+                    path = it.absolutePath,
+                    lastModified = it.lastModified()
+                )
+            } ?: emptyList()
 
     private fun String.isImagePath(): Boolean =
         MEMES_IMAGE_EXT.any { endsWith(it) }

@@ -22,7 +22,10 @@ import com.devcampus.memes_list.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun DefaultAppBar() {
+internal fun DefaultAppBar(
+    sortModeSelection: Int,
+    onSortModeSelected: (Int) -> Unit,
+) {
     TopAppBar(
         title = {
             Text(
@@ -34,9 +37,7 @@ internal fun DefaultAppBar() {
             containerColor = SurfaceContainer
         ),
         actions = {
-            SortOptionsDropdown {
-                // TODO: handle sort option selection
-            }
+            SortOptionsDropdown(sortModeSelection, onSortModeSelected)
         }
     )
 }

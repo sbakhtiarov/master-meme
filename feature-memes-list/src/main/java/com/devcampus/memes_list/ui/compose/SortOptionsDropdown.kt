@@ -12,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,16 +22,16 @@ import com.devcampus.memes_list.R
 
 @Composable
 internal fun SortOptionsDropdown(
+    selectedItem: Int,
     onSortOptionSelected: (Int) -> Unit
 ) {
 
     val menuItems = listOf(
-        stringResource(R.string.sort_favourites_first),
         stringResource(R.string.sort_newest_first),
+        stringResource(R.string.sort_favourites_first),
     )
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier.wrapContentSize(Alignment.Center)
@@ -55,10 +54,8 @@ internal fun SortOptionsDropdown(
                 DropdownMenuItem(
                     text = { Text(text = text) },
                     onClick = {
-                        selectedItem = index
-                        expanded = false
-
                         onSortOptionSelected(index)
+                        expanded = false
                     }
                 )
             }
