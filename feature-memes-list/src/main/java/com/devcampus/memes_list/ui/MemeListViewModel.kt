@@ -71,7 +71,10 @@ internal class MemeListViewModel @Inject constructor(
     }
 
     private fun handleShareSelection() {
-
+        (_state.value as? DataState)?.selection?.let { selection ->
+            if (selection.isEmpty()) return
+            sendAction(Share(paths = selection.map { it.path }))
+        }
     }
 
     private fun handleDeleteConfirmation() {
@@ -180,3 +183,4 @@ internal sealed interface Intent {
 internal sealed interface Action
 data object ShowErrorMessage : Action
 data object ShowDeletionConfirmation : Action
+data class Share(val paths: List<String>) : Action

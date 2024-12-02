@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.devcampus.memes_list.R
@@ -28,9 +29,11 @@ import com.devcampus.memes_list.ui.Error
 import com.devcampus.memes_list.ui.Intent
 import com.devcampus.memes_list.ui.Loading
 import com.devcampus.memes_list.ui.MemeListViewModel
+import com.devcampus.memes_list.ui.Share
 import com.devcampus.memes_list.ui.ShowDeletionConfirmation
 import com.devcampus.memes_list.ui.ShowErrorMessage
 import kotlinx.coroutines.flow.collectLatest
+import java.io.File
 
 @Composable
 fun MemesScreen() {
@@ -112,11 +115,33 @@ fun MemesScreen() {
     LaunchedEffect(Unit) {
         viewModel.actions.collectLatest { action ->
             when (action) {
-                ShowDeletionConfirmation -> showDeleteConformation = true
-                ShowErrorMessage -> showError(context)
+                is ShowDeletionConfirmation -> showDeleteConformation = true
+                is ShowErrorMessage -> showError(context)
+                is Share -> showShareDialog(context, action.paths)
             }
         }
     }
+}
+
+private fun showShareDialog(context: Context, paths: List<String>) {
+    val shareIntent = android.content.Intent().apply {
+        action = android.content.Intent.ACTION_SEND_MULTIPLE
+        putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, ArrayList(
+            paths.mapNotNull {
+                try {
+                    FileProvider.getUriForFile(
+                        context,
+                        "com.devcampus.mastermeme.fileprovider",
+                        File(it)
+                    )
+                } catch (e: IllegalArgumentException) {
+                    null
+                }
+            }
+        ))
+        type = "image/jpg"
+    }
+    context.startActivity(android.content.Intent.createChooser(shareIntent, null))
 }
 
 private fun showError(context: Context) {

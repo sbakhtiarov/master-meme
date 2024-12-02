@@ -18,7 +18,7 @@ internal class MemesRepositoryImpl @Inject constructor(
 
     private companion object {
         private const val MEMES_FOLDER = "memes"
-        private val MEMES_IMAGE_EXT = listOf(".jpg", ".png")
+        private val MEMES_IMAGE_EXT = listOf(".jpg", ".png", ".webp")
     }
 
     override fun getMemes(): Flow<List<MemeFile>> =
