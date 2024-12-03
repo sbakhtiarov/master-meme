@@ -45,6 +45,7 @@ dependencies {
 
     implementation(project(":common-android"))
     implementation(project(":feature-memes-list"))
+    implementation(project(":feature-meme-templates"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

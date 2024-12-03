@@ -201,3 +201,5 @@ internal sealed interface Action
 data object ShowErrorMessage : Action
 data object ShowDeletionConfirmation : Action
 data class Share(val paths: List<String>) : Action
+
+internal fun ViewState.isInSelectionMode() = (this as? DataState)?.selection != null

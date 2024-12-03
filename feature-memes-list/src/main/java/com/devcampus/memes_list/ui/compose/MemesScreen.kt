@@ -4,7 +4,15 @@ import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.devcampus.meme_templates.ui.MemeTemplatesBottomSheet
 import com.devcampus.memes_list.R
 import com.devcampus.memes_list.ui.DataState
 import com.devcampus.memes_list.ui.EmptyState
@@ -32,6 +41,7 @@ import com.devcampus.memes_list.ui.MemeShare
 import com.devcampus.memes_list.ui.Share
 import com.devcampus.memes_list.ui.ShowDeletionConfirmation
 import com.devcampus.memes_list.ui.ShowErrorMessage
+import com.devcampus.memes_list.ui.isInSelectionMode
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -48,11 +58,12 @@ fun MemesScreen() {
     BackHandler(enabled = (viewState as? DataState)?.selection != null) { sendIntent(Intent.OnBackPress) }
 
     var showDeleteConformation by remember { mutableStateOf(false) }
+    var showTemplatesBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             AnimatedContent(
-                targetState = (viewState as? DataState)?.selection != null,
+                targetState = viewState.isInSelectionMode(),
                 label = "AppBarAnimation"
             ) { isSelectionMode ->
                 if (isSelectionMode) {
@@ -71,13 +82,22 @@ fun MemesScreen() {
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {},
+            AnimatedVisibility(
+                visible = viewState.isInSelectionMode().not(),
+                enter = fadeIn(),
+                exit = fadeOut(),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                )
+                FloatingActionButton(
+                    modifier = Modifier.padding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal).asPaddingValues()),
+                    onClick = {
+                        showTemplatesBottomSheet = true
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -114,6 +134,13 @@ fun MemesScreen() {
                 }
             )
         }
+    }
+
+    if (showTemplatesBottomSheet) {
+        MemeTemplatesBottomSheet(
+            onSelected = { showTemplatesBottomSheet = false },
+            onDismissed = { showTemplatesBottomSheet = false }
+        )
     }
 
     LaunchedEffect(Unit) {

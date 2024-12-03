@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.devcampus.memes_list"
+    namespace = "com.devcampus.meme_templates"
     compileSdk = 35
 
     defaultConfig {
@@ -42,7 +42,6 @@ android {
 dependencies {
 
     implementation(project(":common-android"))
-    implementation(project(":feature-meme-templates"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -63,4 +62,5 @@ dependencies {
     implementation(libs.datastore.preferences)
 
     debugImplementation(libs.androidx.ui.tooling)
+
 }
