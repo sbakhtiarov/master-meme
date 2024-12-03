@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="choose_template_dialog_title">Choose template</string>
+    <string name="choose_template_dialog_message">Choose template for your next meme masterpiece</string>
+    <string name="no_templates_found">No templates found.</string>
+    <plurals name="templates_count">
+        <item quantity="one">%1$s template</item>
+        <item quantity="other">%1$s templates</item>
+    </plurals>
+</resources>

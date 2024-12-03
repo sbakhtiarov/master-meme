@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.devcampus.meme_templates.ui.MemeTemplatesBottomSheet
+import com.devcampus.meme_templates.ui.compose.MemeTemplatesBottomSheet
 import com.devcampus.memes_list.R
 import com.devcampus.memes_list.ui.DataState
 import com.devcampus.memes_list.ui.EmptyState
