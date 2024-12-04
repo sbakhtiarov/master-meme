@@ -58,7 +58,7 @@ fun MemesScreen(
 
     BackHandler(enabled = (viewState as? DataState)?.selection != null) { sendIntent(Intent.OnBackPress) }
 
-    var showDeleteConformation by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -121,16 +121,16 @@ fun MemesScreen(
         }
     }
 
-    if (showDeleteConformation) {
+    if (showDeleteConfirmation) {
         (viewState as? DataState)?.selection?.size?.let { count ->
             ConfirmationDialog(
                 count = count,
                 onConfirm = {
-                    showDeleteConformation = false
+                    showDeleteConfirmation = false
                     sendIntent(Intent.OnDeleteConfirmed)
                 },
                 onCancel = {
-                    showDeleteConformation = false
+                    showDeleteConfirmation = false
                 }
             )
         }
@@ -139,7 +139,7 @@ fun MemesScreen(
     LaunchedEffect(Unit) {
         viewModel.actions.collectLatest { action ->
             when (action) {
-                is ShowDeletionConfirmation -> showDeleteConformation = true
+                is ShowDeletionConfirmation -> showDeleteConfirmation = true
                 is ShowErrorMessage -> showError(context)
                 is Share -> showShareDialog(context, action.paths)
             }

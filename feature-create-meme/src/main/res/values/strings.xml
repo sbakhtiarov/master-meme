@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_meme">New meme</string>
+    <string name="leave_editor_dialog_title">Leave editor?</string>
+    <string name="leave_editor_dialog_message">You will lose your precious meme. If you\'re fine with that, press ‘Leave’.</string>
+    <string name="cancel">Cancel</string>
+    <string name="leave">Leave</string>
+</resources>
