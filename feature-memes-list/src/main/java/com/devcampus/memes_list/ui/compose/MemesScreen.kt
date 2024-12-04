@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.devcampus.meme_templates.ui.compose.MemeTemplatesBottomSheet
 import com.devcampus.memes_list.R
 import com.devcampus.memes_list.ui.DataState
 import com.devcampus.memes_list.ui.EmptyState
@@ -45,7 +44,9 @@ import com.devcampus.memes_list.ui.isInSelectionMode
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun MemesScreen() {
+fun MemesScreen(
+    onAddClick: () -> Unit,
+) {
 
     val viewModel: MemeListViewModel = hiltViewModel()
     val viewState by viewModel.state.collectAsStateWithLifecycle()
@@ -58,7 +59,6 @@ fun MemesScreen() {
     BackHandler(enabled = (viewState as? DataState)?.selection != null) { sendIntent(Intent.OnBackPress) }
 
     var showDeleteConformation by remember { mutableStateOf(false) }
-    var showTemplatesBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -90,7 +90,7 @@ fun MemesScreen() {
                 FloatingActionButton(
                     modifier = Modifier.padding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal).asPaddingValues()),
                     onClick = {
-                        showTemplatesBottomSheet = true
+                        onAddClick()
                     },
                 ) {
                     Icon(
@@ -134,13 +134,6 @@ fun MemesScreen() {
                 }
             )
         }
-    }
-
-    if (showTemplatesBottomSheet) {
-        MemeTemplatesBottomSheet(
-            onSelected = { showTemplatesBottomSheet = false },
-            onDismissed = { showTemplatesBottomSheet = false }
-        )
     }
 
     LaunchedEffect(Unit) {

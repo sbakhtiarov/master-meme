@@ -36,23 +36,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.devcampus.common_android.ui.theme.BottomSheetScrimColorStart
-import com.devcampus.meme_templates.domain.model.MemeTemplate
 import com.devcampus.meme_templates.ui.MemeTemplatesViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemeTemplatesBottomSheet(
-    onSelected: (MemeTemplate) -> Unit,
+    onSelected: (String) -> Unit,
     onDismissed: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
-    val viewModel: MemeTemplatesViewModel = viewModel()
+    val viewModel: MemeTemplatesViewModel = hiltViewModel()
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     var isInSearchMode by remember { mutableStateOf(false) }
@@ -80,7 +79,6 @@ fun MemeTemplatesBottomSheet(
             },
         sheetState = sheetState,
         onDismissRequest = {
-            viewModel.onQueryUpdate("")
             onDismissed()
         }
     ) {
@@ -102,7 +100,6 @@ fun MemeTemplatesBottomSheet(
                         templatesCount = viewState.templates.size,
                         onDismissed = {
                             isInSearchMode = false
-                            viewModel.onQueryUpdate("")
                         },
                         onQueryUpdate = {
                             viewModel.onQueryUpdate(it)
@@ -138,8 +135,7 @@ fun MemeTemplatesBottomSheet(
                             .clip(RoundedCornerShape(16.dp))
                             .aspectRatio(1f)
                             .clickable {
-                                viewModel.onQueryUpdate("")
-                                onSelected(template)
+                                onSelected(template.path)
                             }
                     ) {
                         AsyncImage(
@@ -148,7 +144,6 @@ fun MemeTemplatesBottomSheet(
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                         )
-
                     }
                 }
             }

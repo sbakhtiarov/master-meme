@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":common-android"))
     implementation(project(":feature-memes-list"))
     implementation(project(":feature-meme-templates"))
+    implementation(project(":feature-create-meme"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -58,6 +59,8 @@ dependencies {
 
     implementation(libs.android.hilt)
     kapt(libs.android.hilt.compiler)
+
+    implementation(libs.androidx.navigation)
 
     debugImplementation(libs.androidx.ui.tooling)
 }

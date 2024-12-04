@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.devcampus.memes_list"
+    namespace = "com.devcampus.create_meme"
     compileSdk = 35
 
     defaultConfig {
@@ -40,7 +40,6 @@ android {
 }
 
 dependencies {
-
     implementation(project(":common-android"))
 
     implementation(libs.androidx.core.ktx)
@@ -58,8 +57,6 @@ dependencies {
     implementation(libs.android.hilt)
     implementation(libs.android.hilt.navigation)
     kapt(libs.android.hilt.compiler)
-
-    implementation(libs.datastore.preferences)
 
     debugImplementation(libs.androidx.ui.tooling)
 }
