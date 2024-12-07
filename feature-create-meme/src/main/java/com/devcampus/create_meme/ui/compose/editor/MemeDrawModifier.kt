@@ -7,6 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextStyle
@@ -90,15 +91,33 @@ private fun DrawScope.drawDecor(
     state: MemeEditorState,
 ) {
     requireNotNull(decor.topLeft)
+    requireNotNull(decor.size)
 
     when (decor.type) {
         is DecorType.TextDecor -> {
-            drawText(
-                textMeasurer = state.textMeasurer,
-                text = decor.type.text,
-                topLeft = decor.topLeft,
-                style = TextStyle.Default.copy(fontSize = decor.type.fontSize)
+
+            val style = TextStyle.Default.copy(
+                fontFamily = decor.type.fontFamily,
+                fontSize = decor.type.fontSize
             )
+
+            val layoutResult = state.textMeasurer.measure(decor.type.text, style)
+
+            drawText(
+                textLayoutResult = layoutResult,
+                color = decor.type.color,
+                topLeft = decor.topLeft,
+                drawStyle = Fill,
+            )
+
+            if (decor.type.isStroke) {
+                drawText(
+                    textLayoutResult = layoutResult,
+                    color = decor.type.strokeColor,
+                    topLeft = decor.topLeft,
+                    drawStyle = Stroke(width = 4f),
+                )
+            }
         }
     }
 }

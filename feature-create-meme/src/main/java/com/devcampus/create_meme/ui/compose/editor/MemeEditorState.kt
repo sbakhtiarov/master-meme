@@ -119,7 +119,12 @@ class MemeEditorState(
     fun addTextDecor(text: String) {
         canvasSize?.let { canvasSize ->
 
-            val size = textMeasurer.measure(text, TextStyle.Default.copy(fontSize = 20.sp)).size
+            val size = textMeasurer.measure(
+                text = text,
+                style = TextStyle.Default.copy(
+                    fontFamily = DecorType.TextDecor.DefaultFontFamily,
+                    fontSize = DecorType.TextDecor.DefaultFontSize
+                )).size
 
             val decor = MemeDecor(
                 id = UUID.randomUUID().toString(),
