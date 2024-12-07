@@ -2,8 +2,6 @@ package com.devcampus.create_meme.ui.compose
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil3.compose.AsyncImage
 import com.devcampus.common_android.ui.theme.Primary
 import com.devcampus.common_android.ui.theme.SurfaceContainer
 import com.devcampus.create_meme.R
@@ -43,6 +40,8 @@ import com.devcampus.create_meme.ui.CreateMemeViewModel
 import com.devcampus.create_meme.ui.Intent
 import com.devcampus.create_meme.ui.Intent.OnBackPress
 import com.devcampus.create_meme.ui.ShowLeaveConfirmation
+import com.devcampus.create_meme.ui.compose.editor.MemeEditor
+import com.devcampus.create_meme.ui.compose.editor.rememberMemeEditorState
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +55,20 @@ fun CreateMemeScreen(
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
 
     var showLeaveConfirmation by remember { mutableStateOf(false) }
+
+    val editorState = rememberMemeEditorState(
+        memeTemplatePath = templateAsset,
+        decorItems = viewModel.decorItems,
+        onDeleteClick = { id ->
+            sendIntent(Intent.OnDecorDeleted(id))
+        },
+        onDecorAdded = { decor ->
+            sendIntent(Intent.OnDecorAdded(decor))
+        },
+        onDecorMoved = { id, offset ->
+            sendIntent(Intent.OnDecorMoved(id, offset))
+        },
+    )
 
     BackHandler { sendIntent(OnBackPress) }
 
@@ -105,7 +118,9 @@ fun CreateMemeScreen(
                         .weight(1f))
 
                     OutlinedButton(
-                        onClick = {}
+                        onClick = {
+                            editorState.addTextDecor(text = "TAP TWICE TO EDIT")
+                        }
                     ) {
                         Text(text = "Add text")
                     }
@@ -125,18 +140,12 @@ fun CreateMemeScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        MemeEditor(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            AsyncImage(
-                modifier = Modifier.fillMaxWidth(),
-                model = templateAsset,
-                contentDescription = null
-            )
-        }
+            state = editorState,
+        )
     }
 
     if (showLeaveConfirmation) {
