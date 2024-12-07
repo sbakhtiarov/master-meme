@@ -5,4 +5,6 @@
     <string name="leave_editor_dialog_message">You will lose your precious meme. If you\'re fine with that, press ‘Leave’.</string>
     <string name="cancel">Cancel</string>
     <string name="leave">Leave</string>
+    <string name="add_text">Add text</string>
+    <string name="save_meme">Save meme</string>
 </resources>

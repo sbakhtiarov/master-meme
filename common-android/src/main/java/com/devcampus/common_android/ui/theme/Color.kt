@@ -14,6 +14,7 @@ val Primary = Color(0xFFEADDFF)
 val OnPrimary = Color(0xFF21005D)
 val Surface = Color(0xFF141218)
 val SurfaceContainer = Color(0xFF1D1B20)
+val SurfaceContainerHigh = Color(0xFF2B2930)
 val TextOutline = Color(0xFF79747E)
 
 val ScrimColorStart = Color(0xE61D1B20)

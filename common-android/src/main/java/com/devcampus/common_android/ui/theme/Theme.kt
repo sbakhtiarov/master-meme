@@ -12,6 +12,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = Primary,
     onPrimary = OnPrimary,
     primaryContainer = Primary,
+    surfaceContainerHigh = SurfaceContainerHigh,
     secondary = PurpleGrey80,
     tertiary = Pink80
 )

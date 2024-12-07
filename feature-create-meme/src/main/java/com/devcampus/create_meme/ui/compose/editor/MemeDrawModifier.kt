@@ -25,8 +25,10 @@ fun Modifier.drawMemeDecor(
         drawContent()
 
         state.dragItem?.let { decor ->
-            drawDecorBorder(decor, state)
-            drawDeleteButton(decor, state)
+            if (decor.id == state.selectedItem?.id) {
+                drawDecorBorder(decor, state)
+                drawDeleteButton(decor, state)
+            }
             drawDecor(decor, state)
         }
 
@@ -34,8 +36,12 @@ fun Modifier.drawMemeDecor(
             .filterPlaced()
             .filter { it.id != state.dragItem?.id }
             .forEach { decor ->
-                drawDecorBorder(decor, state)
-                drawDeleteButton(decor, state)
+
+                if (decor.id == state.selectedItem?.id) {
+                    drawDecorBorder(decor, state)
+                    drawDeleteButton(decor, state)
+                }
+
                 drawDecor(decor, state)
             }
     }

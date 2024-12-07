@@ -21,7 +21,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
@@ -40,6 +39,9 @@ class MemeEditorState(
     val onDeleteClick: (String) -> Unit,
     val onDecorMoved: (String, Offset) -> Unit,
 ) {
+
+    var selectedItem by mutableStateOf<MemeDecor?>(null)
+        private set
 
     var dragItem by mutableStateOf<MemeDecor?>(null)
         private set
@@ -100,7 +102,8 @@ class MemeEditorState(
     }
 
     fun onTap(offset: Offset) {
-        val decorItem = decorItems.filterPlaced().find { decor ->
+
+        decorItems.filterPlaced().forEach { decor ->
 
             requireNotNull(decor.topLeft)
             requireNotNull(decor.size)
@@ -110,10 +113,24 @@ class MemeEditorState(
 
             val deleteButtonRect: Rect = Rect(left, top, left + deleteIconSize, top + deleteIconSize)
 
-            deleteButtonRect.contains(offset)
-        }
+            if (deleteButtonRect.contains(offset)) {
 
-        decorItem?.let { onDeleteClick(decorItem.id) }
+                if (decor.id == selectedItem?.id) {
+                    selectedItem = null
+                }
+
+                onDeleteClick(decor.id)
+
+                return
+            }
+
+            val decorRect = Rect(offset = decor.topLeft, size = decor.size).inflate(2 * borderMargin)
+
+            if (decorRect.contains(offset)) {
+                selectedItem = decor
+                return
+            }
+        }
     }
 
     fun addTextDecor(text: String) {
@@ -136,9 +153,19 @@ class MemeEditorState(
                 size = size.toSize(),
             )
 
+            selectedItem = decor
+
             onDecorAdded(decor)
         }
 
+    }
+
+    fun cancelChanges() {
+        selectedItem = null
+    }
+
+    fun confirmChanges() {
+        selectedItem = null
     }
 }
 
