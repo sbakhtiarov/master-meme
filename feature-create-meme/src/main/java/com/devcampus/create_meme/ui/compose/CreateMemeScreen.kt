@@ -3,7 +3,10 @@ package com.devcampus.create_meme.ui.compose
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -16,10 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -61,7 +65,20 @@ fun CreateMemeScreen(
         onDecorMoved = { id, offset ->
             sendIntent(Intent.OnDecorMoved(id, offset))
         },
+        onDecorUpdated = { decor ->
+            sendIntent(Intent.OnDecorUpdated(decor))
+        }
     )
+
+    val bottomBarType by remember {
+        derivedStateOf {
+            if (editorState.selectedItem == null) {
+                BottomBarType.DEFAULT
+            } else {
+                BottomBarType.TEXT_OPTIONS
+            }
+        }
+    }
 
     BackHandler { sendIntent(OnBackPress) }
 
@@ -88,20 +105,26 @@ fun CreateMemeScreen(
         },
         bottomBar = {
             AnimatedContent(
-                targetState = editorState.selectedItem,
+                targetState = bottomBarType,
                 label = "bottom bar",
-            ) { selectedItem ->
-                if (selectedItem == null) {
-                    DefaultBottomBar(
-                        onAddClick = { editorState.addTextDecor(text = "TAP TWICE TO EDIT") },
-                        onSaveClick = { sendIntent(Intent.OnSaveMeme(templateAsset)) }
-                    )
-                } else {
-                    TextOptionsBottomBar(
-                        decor = selectedItem,
-                        onCancel = { editorState.cancelChanges() },
-                        onConfirm = { editorState.confirmChanges() }
-                    )
+            ) { bottomBarType ->
+                when(bottomBarType) {
+                    BottomBarType.DEFAULT ->
+                        DefaultBottomBar(
+                            onAddClick = { editorState.addTextDecor(text = "TAP TWICE TO EDIT") },
+                            onSaveClick = { sendIntent(Intent.OnSaveMeme(templateAsset)) }
+                        )
+                    BottomBarType.TEXT_OPTIONS ->
+                        if (editorState.selectedItem != null) {
+                            TextOptionsBottomBar(
+                                decor = editorState.selectedItem ?: error("No selection"),
+                                onFontSelected = { editorState.setFont(it) },
+                                onCancel = { editorState.cancelChanges() },
+                                onConfirm = { editorState.confirmChanges() }
+                            )
+                        } else {
+                            Box(Modifier.fillMaxWidth().height(100.dp))
+                        }
                 }
             }
         }
@@ -134,4 +157,8 @@ fun CreateMemeScreen(
             }
         }
     }
+}
+
+private enum class BottomBarType {
+    DEFAULT, TEXT_OPTIONS
 }

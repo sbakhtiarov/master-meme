@@ -50,12 +50,22 @@ internal class CreateMemeViewModel @Inject constructor(
                 is Intent.OnDecorAdded -> addDecor(intent.decor)
                 is Intent.OnDecorDeleted -> deleteDecor(intent.id)
                 is Intent.OnDecorMoved -> moveDecor(intent.id, intent.offset)
+                is Intent.OnDecorUpdated -> updateDecor(intent.decor)
             }
         }.launchIn(viewModelScope)
     }
 
     private fun addDecor(decor: MemeDecor) {
         decorItems.add(decor)
+    }
+
+    private fun updateDecor(decor: MemeDecor) {
+        decorItems.indexOfFirst { it.id == decor.id }.takeIf { it >= 0 }?.let { index ->
+            decorItems.set(
+                index = index,
+                element = decor
+            )
+        }
     }
 
     private fun deleteDecor(id: String) {
@@ -91,6 +101,7 @@ internal sealed interface Intent {
     data object OnBackPress : Intent
     data class OnSaveMeme(val assetPath: String) : Intent
     data class OnDecorAdded(val decor: MemeDecor) : Intent
+    data class OnDecorUpdated(val decor: MemeDecor) : Intent
     data class OnDecorDeleted(val id: String) : Intent
     data class OnDecorMoved(val id: String, val offset: Offset) : Intent
 }

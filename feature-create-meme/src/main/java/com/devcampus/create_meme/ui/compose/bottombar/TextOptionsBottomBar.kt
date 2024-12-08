@@ -35,17 +35,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.devcampus.common_android.ui.conditional
 import com.devcampus.create_meme.R
+import com.devcampus.create_meme.ui.compose.editor.MemeFontFamily
 import com.devcampus.create_meme.ui.model.MemeDecor
 
 @Composable
 fun TextOptionsBottomBar(
     decor: MemeDecor,
+    onFontSelected: (MemeFontFamily) -> Unit,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
 
-    var selectedButton by remember { mutableStateOf<EditButton?>(null) }
+    var selectedButton by remember(decor.id) { mutableStateOf<EditButton?>(null) }
 
     fun toggleSelection(button: EditButton) {
         selectedButton = if (selectedButton == button) {
@@ -67,10 +70,13 @@ fun TextOptionsBottomBar(
             label = "text style bars"
         ) { button ->
             when (button) {
-                EditButton.STYLE -> TextStyleBar()
+                EditButton.STYLE -> TextStyleBar(
+                    decor = decor,
+                    onFontSelected = onFontSelected
+                )
                 EditButton.SIZE -> TextSizeBar()
                 EditButton.COLOR -> TextColorBar()
-                null -> Box(Modifier.fillMaxWidth().height(100.dp))
+                null -> Box(Modifier.fillMaxWidth())
             }
         }
 
@@ -164,13 +170,4 @@ private fun Modifier.optionButton(
         }
         .clip(RoundedCornerShape(12.dp))
         .clickable { onClick() }
-}
-
-@Composable
-private fun Modifier.conditional(condition : Boolean, modifier : @Composable Modifier.() -> Modifier) : Modifier {
-    return if (condition) {
-        then(modifier(Modifier))
-    } else {
-        this
-    }
 }

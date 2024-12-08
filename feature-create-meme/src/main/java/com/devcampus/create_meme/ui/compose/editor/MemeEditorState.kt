@@ -38,6 +38,7 @@ class MemeEditorState(
     val onDecorAdded: (MemeDecor) -> Unit,
     val onDeleteClick: (String) -> Unit,
     val onDecorMoved: (String, Offset) -> Unit,
+    val onDecorUpdated: (MemeDecor) -> Unit,
 ) {
 
     var selectedItem by mutableStateOf<MemeDecor?>(null)
@@ -49,40 +50,51 @@ class MemeEditorState(
     var canvasSize: Size? = null
 
     fun onDragStart(offset: Offset) {
-        dragItem = decorItems
-            .filterPlaced()
-            .find { decor ->
 
-                requireNotNull(decor.topLeft)
-                requireNotNull(decor.size)
+        // Check if dragging selected item
+        selectedItem?.onTap(offset) { decor ->
+            dragItem = selectedItem
+            return
+        }
 
-                val rect = Rect(offset = decor.topLeft, size = decor.size).inflate(2 * borderMargin)
-
-                rect.contains(offset)
+        decorItems.filterPlaced().onEach { decor ->
+            decor.onTap(offset) {
+                dragItem = decor
+                return
             }
+        }
     }
 
     fun onDrag(dragOffset: Offset) {
-        dragItem?.let { decor ->
+        dragItem?.let { dragItem ->
 
-            requireNotNull(decor.topLeft)
-            requireNotNull(decor.size)
+            requireNotNull(dragItem.topLeft)
+            requireNotNull(dragItem.size)
 
             canvasSize?.let { canvasSize ->
 
-                val newTopLeft = decor.topLeft + dragOffset
+                val newTopLeft = dragItem.topLeft + dragOffset
 
                 val left = newTopLeft.x.coerceIn(
                     minimumValue = borderMargin,
-                    maximumValue = canvasSize.width.toFloat() - decor.size.width - borderMargin
+                    maximumValue = canvasSize.width.toFloat() - dragItem.size.width - borderMargin
                 )
 
                 val top = newTopLeft.y.coerceIn(
                     minimumValue = borderMargin,
-                    maximumValue = canvasSize.height.toFloat() - decor.size.height - borderMargin
+                    maximumValue = canvasSize.height.toFloat() - dragItem.size.height - borderMargin
                 )
 
-                dragItem = decor.copy(topLeft = Offset(left, top))
+                this@MemeEditorState.dragItem = dragItem.copy(topLeft = Offset(left, top))
+
+                selectedItem?.let { selectedItem ->
+                    if (selectedItem.id == dragItem.id) {
+                        // Update selected item if dragging selected item
+                        this@MemeEditorState.selectedItem = selectedItem.copy(
+                            topLeft = Offset(left, top)
+                        )
+                    }
+                }
             }
         }
     }
@@ -103,44 +115,74 @@ class MemeEditorState(
 
     fun onTap(offset: Offset) {
 
-        decorItems.filterPlaced().forEach { decor ->
+        selectedItem?.onTapDelete(offset) { decor ->
+            onDeleteClick(decor.id)
+            selectedItem = null
+            return
+        }
 
-            requireNotNull(decor.topLeft)
-            requireNotNull(decor.size)
+        decorItems
+            .filterPlaced()
+            .filter { it.id != selectedItem?.id }
+            .forEach { decor ->
+                decor.onTap(offset) {
 
-            val left = decor.topLeft.x + decor.size.width + borderMargin - deleteIconSize / 2f
-            val top = decor.topLeft.y - borderMargin - deleteIconSize / 2f
+                    // Other item selected. Save changes and switch to new item
 
-            val deleteButtonRect: Rect = Rect(left, top, left + deleteIconSize, top + deleteIconSize)
+                    selectedItem?.let { confirmChanges() }
 
-            if (deleteButtonRect.contains(offset)) {
-
-                if (decor.id == selectedItem?.id) {
-                    selectedItem = null
+                    selectedItem = decor
+                    return
                 }
-
-                onDeleteClick(decor.id)
-
-                return
             }
 
-            val decorRect = Rect(offset = decor.topLeft, size = decor.size).inflate(2 * borderMargin)
+        // Tap outside. Save changes and clear selection
+        selectedItem?.let { confirmChanges() }
+    }
 
-            if (decorRect.contains(offset)) {
-                selectedItem = decor
-                return
-            }
+    /**
+     * Call 'block' if delete button is tapped
+     */
+    private inline fun MemeDecor.onTapDelete(offset: Offset, block: (MemeDecor) -> Unit) {
+
+        if (topLeft == null || size == null) return
+
+        val left = topLeft.x + size.width + borderMargin - deleteIconSize / 2f
+        val top = topLeft.y - borderMargin - deleteIconSize / 2f
+
+        val deleteButtonRect: Rect = Rect(left, top, left + deleteIconSize, top + deleteIconSize)
+
+        if(deleteButtonRect.contains(offset)) {
+            block(this)
         }
     }
 
+    /**
+     * Call 'block' if item is tapped
+     */
+    private inline fun MemeDecor.onTap(offset: Offset, block: (MemeDecor) -> Unit) {
+
+        if (topLeft == null || size == null) return
+
+        val decorRect = Rect(offset = topLeft, size = size).inflate(2 * borderMargin)
+
+        if(decorRect.contains(offset)) {
+            block(this)
+        }
+    }
+
+    /**
+     * Add new text decor
+     * Measure size and set position for new decor before adding.
+     */
     fun addTextDecor(text: String) {
         canvasSize?.let { canvasSize ->
 
             val size = textMeasurer.measure(
                 text = text,
                 style = TextStyle.Default.copy(
-                    fontFamily = DecorType.TextDecor.DefaultFontFamily,
-                    fontSize = DecorType.TextDecor.DefaultFontSize
+                    fontFamily = DecorType.TextDecor.DefaultFontFamily.fontFamily,
+                    fontSize = DecorType.TextDecor.DefaultFontFamily.baseFontSize,
                 )).size
 
             val decor = MemeDecor(
@@ -165,7 +207,50 @@ class MemeEditorState(
     }
 
     fun confirmChanges() {
-        selectedItem = null
+        selectedItem?.let { selectedItem ->
+
+            decorItems.find { it.id == selectedItem.id }?.let { currentItem ->
+                if (currentItem.type != selectedItem.type) {
+                    onDecorUpdated(selectedItem)
+                }
+            }
+
+            this@MemeEditorState.selectedItem = null
+        }
+    }
+
+    /**
+     * Set new font.
+     * Update decor size and position for new font selection
+     */
+    fun setFont(font: MemeFontFamily) {
+        selectedItem?.let { decor ->
+
+            requireNotNull(decor.topLeft)
+            requireNotNull(decor.size)
+
+            val decorType = (decor.type as? DecorType.TextDecor) ?: return
+
+            val oldSize = decor.size
+            val newSize = textMeasurer.measure(
+                text = decorType.text,
+                style = TextStyle.Default.copy(
+                    fontFamily = font.fontFamily,
+                    fontSize = font.baseFontSize
+                )
+            ).size.toSize()
+
+            val topLeft = Offset(
+                x = decor.topLeft.x - (newSize.width - oldSize.width) / 2f,
+                y = decor.topLeft.y - (newSize.height - oldSize.height) / 2f,
+            )
+
+            selectedItem = decor.copy(
+                type = decorType.copy(fontFamily = font),
+                topLeft = topLeft,
+                size = newSize,
+            )
+        }
     }
 }
 
@@ -173,7 +258,7 @@ class MemeEditorState(
 fun rememberMemeEditorState(
     memeTemplatePath: String,
     decorItems: List<MemeDecor>,
-    borderColor: Color = Color.Black,
+    borderColor: Color = Color.White,
     borderMargin: Dp = 12.dp,
     borderCornerRadius: Dp = 8.dp,
     deleteIcon: ImageVector = MemeIcons.DecorDelete,
@@ -181,21 +266,40 @@ fun rememberMemeEditorState(
     onDecorAdded: (MemeDecor) -> Unit,
     onDeleteClick: (String) -> Unit,
     onDecorMoved: (String, Offset) -> Unit,
+    onDecorUpdated: (MemeDecor) -> Unit,
 ): MemeEditorState {
 
-    return MemeEditorState(
-        memeTemplatePath = memeTemplatePath,
-        decorItems = remember { decorItems },
-        textMeasurer = rememberTextMeasurer(),
-        borderColor = borderColor,
-        borderMargin = borderMargin.toPx(),
-        borderCornerRadius = CornerRadius(borderCornerRadius.toPx()),
-        deleteIconPainter = rememberVectorPainter(deleteIcon),
-        deleteIconSize = deleteIconSize.toPx(),
-        onDecorAdded = remember { onDecorAdded },
-        onDeleteClick = remember { onDeleteClick },
-        onDecorMoved = remember { onDecorMoved },
-    )
+    val textMeasurer = rememberTextMeasurer()
+    val deleteIconPainter = rememberVectorPainter(deleteIcon)
+    val borderMargin = borderMargin.toPx()
+    val borderCornerRadius = CornerRadius(borderCornerRadius.toPx())
+    val deleteIconSize = deleteIconSize.toPx()
+
+    return remember(
+        memeTemplatePath,
+        decorItems,
+        textMeasurer,
+        borderColor,
+        borderMargin,
+        borderCornerRadius,
+        deleteIconPainter,
+        deleteIconSize
+    ) {
+        MemeEditorState(
+            memeTemplatePath = memeTemplatePath,
+            decorItems = decorItems,
+            textMeasurer = textMeasurer,
+            borderColor = borderColor,
+            borderMargin = borderMargin,
+            borderCornerRadius = borderCornerRadius,
+            deleteIconPainter = deleteIconPainter,
+            deleteIconSize = deleteIconSize,
+            onDecorAdded = onDecorAdded,
+            onDeleteClick = onDeleteClick,
+            onDecorMoved = onDecorMoved,
+            onDecorUpdated = onDecorUpdated,
+        )
+    }
 }
 
 @Composable

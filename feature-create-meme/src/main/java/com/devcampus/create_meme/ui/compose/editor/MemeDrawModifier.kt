@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -24,27 +25,30 @@ fun Modifier.drawMemeDecor(
 
         drawContent()
 
-        state.dragItem?.let { decor ->
-            if (decor.id == state.selectedItem?.id) {
-                drawDecorBorder(decor, state)
-                drawDeleteButton(decor, state)
-            }
-            drawDecor(decor, state)
+        if (state.dragItem?.id != state.selectedItem?.id) {
+            state.dragItem?.let { decor -> drawDecor(decor, state) }
         }
+
+        state.selectedItem?.let { decor -> drawDecor(decor, state) }
 
         state.decorItems
             .filterPlaced()
             .filter { it.id != state.dragItem?.id }
-            .forEach { decor ->
-
-                if (decor.id == state.selectedItem?.id) {
-                    drawDecorBorder(decor, state)
-                    drawDeleteButton(decor, state)
-                }
-
-                drawDecor(decor, state)
-            }
+            .filter { it.id != state.selectedItem?.id }
+            .forEach { decor -> drawDecor(decor, state) }
     }
+}
+
+private fun DrawScope.drawDecor(
+    decor: MemeDecor,
+    state: MemeEditorState,
+) {
+    if (decor.id == state.selectedItem?.id) {
+        drawDecorBorder(decor, state)
+        drawDeleteButton(decor, state)
+    }
+
+    drawDecorType(decor, state)
 }
 
 private fun DrawScope.drawDecorBorder(
@@ -61,6 +65,14 @@ private fun DrawScope.drawDecorBorder(
 
     drawRoundRect(
         color = state.borderColor,
+        topLeft = decor.topLeft.minus(Offset(state.borderMargin, state.borderMargin)),
+        size = borderRectSize,
+        cornerRadius = state.borderCornerRadius,
+        style = Stroke(width = 2f)
+    )
+
+    drawRoundRect(
+        color = Color.Black,
         topLeft = decor.topLeft.minus(Offset(state.borderMargin, state.borderMargin)),
         size = borderRectSize,
         cornerRadius = state.borderCornerRadius,
@@ -92,7 +104,7 @@ private fun DrawScope.drawDeleteButton(
     }
 }
 
-private fun DrawScope.drawDecor(
+private fun DrawScope.drawDecorType(
     decor: MemeDecor,
     state: MemeEditorState,
 ) {
@@ -103,8 +115,8 @@ private fun DrawScope.drawDecor(
         is DecorType.TextDecor -> {
 
             val style = TextStyle.Default.copy(
-                fontFamily = decor.type.fontFamily,
-                fontSize = decor.type.fontSize
+                fontFamily = decor.type.fontFamily.fontFamily,
+                fontSize = decor.type.fontFamily.baseFontSize
             )
 
             val layoutResult = state.textMeasurer.measure(decor.type.text, style)
@@ -116,7 +128,7 @@ private fun DrawScope.drawDecor(
                 drawStyle = Fill,
             )
 
-            if (decor.type.isStroke) {
+            if (decor.type.fontFamily.isStroke) {
                 drawText(
                     textLayoutResult = layoutResult,
                     color = decor.type.strokeColor,
