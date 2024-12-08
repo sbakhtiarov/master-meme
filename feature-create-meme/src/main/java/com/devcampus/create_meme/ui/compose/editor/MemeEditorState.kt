@@ -77,7 +77,7 @@ class MemeEditorState(
 
                 val left = newTopLeft.x.coerceIn(
                     minimumValue = borderMargin,
-                    maximumValue = canvasSize.width.toFloat() - dragItem.size.width - borderMargin
+                    maximumValue = (canvasSize.width.toFloat() - dragItem.size.width - borderMargin).coerceAtLeast(borderMargin)
                 )
 
                 val top = newTopLeft.y.coerceIn(
@@ -236,7 +236,7 @@ class MemeEditorState(
                 text = decorType.text,
                 style = TextStyle.Default.copy(
                     fontFamily = font.fontFamily,
-                    fontSize = font.baseFontSize
+                    fontSize = font.baseFontSize * decorType.fontScale
                 )
             ).size.toSize()
 
@@ -247,6 +247,40 @@ class MemeEditorState(
 
             selectedItem = decor.copy(
                 type = decorType.copy(fontFamily = font),
+                topLeft = topLeft,
+                size = newSize,
+            )
+        }
+    }
+
+    fun setFontScale(scale: Float) {
+        selectedItem?.let { decor ->
+
+            requireNotNull(decor.topLeft)
+            requireNotNull(decor.size)
+            requireNotNull(canvasSize)
+
+            val decorType = (decor.type as? DecorType.TextDecor) ?: return
+
+            val oldSize = decor.size
+            val newSize = textMeasurer.measure(
+                text = decorType.text,
+                style = TextStyle.Default.copy(
+                    fontFamily = decorType.fontFamily.fontFamily,
+                    fontSize = decorType.fontFamily.baseFontSize * scale
+                )
+            ).size.toSize()
+
+            val topLeft = Offset(
+                x = decor.topLeft.x - (newSize.width - oldSize.width) / 2f,
+                y = decor.topLeft.y - (newSize.height - oldSize.height) / 2f,
+            )
+
+            if (topLeft.x < borderMargin || topLeft.y < borderMargin) return
+            if (topLeft.x + newSize.width > canvasSize!!.width - borderMargin) return
+
+            selectedItem = decor.copy(
+                type = decorType.copy(fontScale = scale),
                 topLeft = topLeft,
                 size = newSize,
             )

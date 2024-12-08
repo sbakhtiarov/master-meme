@@ -19,6 +19,7 @@ sealed interface DecorType {
         val color: Color = Color.White,
         val strokeColor: Color = Color.Black,
         val fontFamily: MemeFontFamily = DefaultFontFamily,
+        val fontScale: Float = 1f,
     ) : DecorType {
 
         companion object {

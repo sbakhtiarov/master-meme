@@ -116,7 +116,7 @@ private fun DrawScope.drawDecorType(
 
             val style = TextStyle.Default.copy(
                 fontFamily = decor.type.fontFamily.fontFamily,
-                fontSize = decor.type.fontFamily.baseFontSize
+                fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale
             )
 
             val layoutResult = state.textMeasurer.measure(decor.type.text, style)

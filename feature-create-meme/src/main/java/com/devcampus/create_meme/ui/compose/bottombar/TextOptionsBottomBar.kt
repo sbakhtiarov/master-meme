@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +43,7 @@ import com.devcampus.create_meme.ui.model.MemeDecor
 fun TextOptionsBottomBar(
     decor: MemeDecor,
     onFontSelected: (MemeFontFamily) -> Unit,
+    onFontScaleChanged: (Float) -> Unit,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -74,7 +74,10 @@ fun TextOptionsBottomBar(
                     decor = decor,
                     onFontSelected = onFontSelected
                 )
-                EditButton.SIZE -> TextSizeBar()
+                EditButton.SIZE -> TextSizeBar(
+                    decor = decor,
+                    onFontScaleChanged = onFontScaleChanged,
+                )
                 EditButton.COLOR -> TextColorBar()
                 null -> Box(Modifier.fillMaxWidth())
             }
