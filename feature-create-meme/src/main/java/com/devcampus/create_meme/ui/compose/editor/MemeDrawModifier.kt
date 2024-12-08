@@ -123,7 +123,7 @@ private fun DrawScope.drawDecorType(
 
             drawText(
                 textLayoutResult = layoutResult,
-                color = decor.type.color,
+                color = decor.type.fontColor,
                 topLeft = decor.topLeft,
                 drawStyle = Fill,
             )

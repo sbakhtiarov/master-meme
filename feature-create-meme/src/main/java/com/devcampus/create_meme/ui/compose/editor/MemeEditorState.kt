@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import com.devcampus.create_meme.ui.common.MemeFontFamily
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
 import java.util.UUID
@@ -283,6 +284,17 @@ class MemeEditorState(
                 type = decorType.copy(fontScale = scale),
                 topLeft = topLeft,
                 size = newSize,
+            )
+        }
+    }
+
+    fun setFontColor(color: Color) {
+        selectedItem?.let { decor ->
+
+            val decorType = (decor.type as? DecorType.TextDecor) ?: return
+
+            selectedItem = decor.copy(
+                type = decorType.copy(fontColor = color),
             )
         }
     }

@@ -119,7 +119,8 @@ fun CreateMemeScreen(
                             TextOptionsBottomBar(
                                 decor = editorState.selectedItem ?: error("No selection"),
                                 onFontSelected = { editorState.setFont(it) },
-                                onFontScaleChanged = { editorState.setFontScale(it) },
+                                onFontScaleSelected = { editorState.setFontScale(it) },
+                                onFontColorSelected = { editorState.setFontColor(it) },
                                 onCancel = { editorState.cancelChanges() },
                                 onConfirm = { editorState.confirmChanges() }
                             )

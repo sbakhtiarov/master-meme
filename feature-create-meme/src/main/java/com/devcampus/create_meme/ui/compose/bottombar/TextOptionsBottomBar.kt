@@ -30,20 +30,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.devcampus.common_android.ui.conditional
 import com.devcampus.create_meme.R
-import com.devcampus.create_meme.ui.compose.editor.MemeFontFamily
+import com.devcampus.create_meme.ui.common.MemeFontFamily
+import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
 
 @Composable
 fun TextOptionsBottomBar(
     decor: MemeDecor,
     onFontSelected: (MemeFontFamily) -> Unit,
-    onFontScaleChanged: (Float) -> Unit,
+    onFontScaleSelected: (Float) -> Unit,
+    onFontColorSelected: (Color) -> Unit,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -76,9 +79,12 @@ fun TextOptionsBottomBar(
                 )
                 EditButton.SIZE -> TextSizeBar(
                     decor = decor,
-                    onFontScaleChanged = onFontScaleChanged,
+                    onFontScaleChanged = onFontScaleSelected,
                 )
-                EditButton.COLOR -> TextColorBar()
+                EditButton.COLOR -> TextColorBar(
+                    decor = decor,
+                    onColorSelected = onFontColorSelected,
+                )
                 null -> Box(Modifier.fillMaxWidth())
             }
         }
@@ -130,7 +136,8 @@ fun TextOptionsBottomBar(
                     modifier = Modifier
                         .optionButton(
                             isSelected = { selectedButton == EditButton.COLOR },
-                            onClick = { toggleSelection(EditButton.COLOR) }
+                            onClick = { toggleSelection(EditButton.COLOR) },
+                            isEnabled = (decor.type as DecorType.TextDecor).fontFamily.colored.not(),
                         ),
                     painter = painterResource(R.drawable.ic_color_picker),
                     contentDescription = null,
@@ -163,6 +170,7 @@ private enum class EditButton {
 private fun Modifier.optionButton(
     isSelected: () -> Boolean,
     onClick: () -> Unit,
+    isEnabled: Boolean = true,
 ) : Modifier {
     return this then Modifier.size(44.dp)
         .conditional(isSelected()) {
@@ -172,5 +180,8 @@ private fun Modifier.optionButton(
             )
         }
         .clip(RoundedCornerShape(12.dp))
-        .clickable { onClick() }
+        .clickable(isEnabled) { onClick() }
+        .conditional(!isEnabled) {
+            alpha(0.2f)
+        }
 }

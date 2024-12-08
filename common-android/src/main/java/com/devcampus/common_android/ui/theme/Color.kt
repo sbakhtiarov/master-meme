@@ -19,3 +19,4 @@ val TextOutline = Color(0xFF79747E)
 
 val ScrimColorStart = Color(0xE61D1B20)
 val BottomSheetScrimColorStart = Color(0xFF000000)
+val Selection = Color(0xFF4A494D)

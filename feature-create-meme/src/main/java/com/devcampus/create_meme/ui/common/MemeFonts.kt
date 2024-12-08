@@ -1,4 +1,4 @@
-package com.devcampus.create_meme.ui.compose.editor
+package com.devcampus.create_meme.ui.common
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -20,7 +20,7 @@ object MemeFonts {
         MemeFontFamily("Londrina Shadow", FontFamily(Font(R.font.londrina_shadow_regular, FontWeight.Normal))),
         MemeFontFamily("Modak", FontFamily(Font(R.font.modak_regular, FontWeight.Normal))),
         MemeFontFamily("Monoton", FontFamily(Font(R.font.monoton_regular, FontWeight.Normal)), baseFontSize = 30.sp),
-        MemeFontFamily("Nabla", FontFamily(Font(R.font.nabla_regular, FontWeight.Normal))),
+        MemeFontFamily("Nabla", FontFamily(Font(R.font.nabla_regular, FontWeight.Normal)), colored = true),
         MemeFontFamily("Rammetto", FontFamily(Font(R.font.rammetto_one_regular, FontWeight.Normal)), baseFontSize = 26.sp),
         MemeFontFamily(
             "Rubik Doodle Shadow",
@@ -37,4 +37,5 @@ data class MemeFontFamily(
     val fontFamily: FontFamily,
     val isStroke: Boolean = false,
     val baseFontSize: TextUnit = 38.sp,
+    val colored: Boolean = false,
 )
