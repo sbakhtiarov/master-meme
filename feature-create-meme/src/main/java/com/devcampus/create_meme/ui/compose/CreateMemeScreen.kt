@@ -2,6 +2,9 @@ package com.devcampus.create_meme.ui.compose
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,10 +23,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -67,7 +70,7 @@ fun CreateMemeScreen(
         },
         onDecorUpdated = { decor ->
             sendIntent(Intent.OnDecorUpdated(decor))
-        }
+        },
     )
 
     val bottomBarType by remember {
@@ -107,6 +110,12 @@ fun CreateMemeScreen(
             AnimatedContent(
                 targetState = bottomBarType,
                 label = "bottom bar",
+                transitionSpec = {
+                    val enter = fadeIn()
+                    val exit = fadeOut()
+                    enter.togetherWith(exit)
+                }
+
             ) { bottomBarType ->
                 when(bottomBarType) {
                     BottomBarType.DEFAULT ->

@@ -29,7 +29,11 @@ fun Modifier.drawMemeDecor(
             state.dragItem?.let { decor -> drawDecor(decor, state) }
         }
 
-        state.selectedItem?.let { decor -> drawDecor(decor, state) }
+        state.selectedItem?.let { decor ->
+            if (state.isInTextEditMode.not()) {
+                drawDecor(decor, state)
+            }
+        }
 
         state.decorItems
             .filterPlaced()

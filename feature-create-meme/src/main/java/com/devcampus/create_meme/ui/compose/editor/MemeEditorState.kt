@@ -48,18 +48,20 @@ class MemeEditorState(
     var dragItem by mutableStateOf<MemeDecor?>(null)
         private set
 
+    var isInTextEditMode by mutableStateOf<Boolean>(false)
+
     var canvasSize: Size? = null
 
     fun onDragStart(offset: Offset) {
 
         // Check if dragging selected item
-        selectedItem?.onTap(offset) { decor ->
+        selectedItem?.containsPosition(offset) { decor ->
             dragItem = selectedItem
             return
         }
 
         decorItems.filterPlaced().onEach { decor ->
-            decor.onTap(offset) {
+            decor.containsPosition(offset) {
                 dragItem = decor
                 return
             }
@@ -126,12 +128,10 @@ class MemeEditorState(
             .filterPlaced()
             .filter { it.id != selectedItem?.id }
             .forEach { decor ->
-                decor.onTap(offset) {
-
+                decor.containsPosition(offset) {
                     // Other item selected. Save changes and switch to new item
-
                     selectedItem?.let { confirmChanges() }
-
+                    isInTextEditMode = false
                     selectedItem = decor
                     return
                 }
@@ -139,8 +139,30 @@ class MemeEditorState(
 
         // Tap outside. Save changes and clear selection
         selectedItem?.let { confirmChanges() }
+
+        // Close text edit mode
+        isInTextEditMode = false
     }
 
+    fun onDoubleTap(offset: Offset) {
+        if (!isInTextEditMode) {
+            decorItems
+                .filterPlaced()
+                .forEach { decor ->
+                    decor.containsPosition(offset) {
+
+                        if (selectedItem != decor) {
+                            selectedItem?.let { confirmChanges() }
+                            selectedItem = decor
+                        }
+
+                        isInTextEditMode = true
+
+                        return
+                    }
+                }
+        }
+    }
     /**
      * Call 'block' if delete button is tapped
      */
@@ -161,7 +183,7 @@ class MemeEditorState(
     /**
      * Call 'block' if item is tapped
      */
-    private inline fun MemeDecor.onTap(offset: Offset, block: (MemeDecor) -> Unit) {
+    private inline fun MemeDecor.containsPosition(offset: Offset, block: (MemeDecor) -> Unit) {
 
         if (topLeft == null || size == null) return
 
@@ -298,6 +320,61 @@ class MemeEditorState(
             )
         }
     }
+
+    fun onTextChange(string: String): Boolean {
+        selectedItem?.let { decor ->
+
+            val textDecor = (decor.type as? DecorType.TextDecor) ?: return false
+
+            requireNotNull(decor.topLeft)
+            requireNotNull(decor.size)
+            requireNotNull(canvasSize)
+
+            val oldSize = decor.size
+            val newSize = textMeasurer.measure(
+                text = string,
+                style = TextStyle.Default.copy(
+                    fontFamily = textDecor.fontFamily.fontFamily,
+                    fontSize = textDecor.fontFamily.baseFontSize * textDecor.fontScale
+                )
+            ).size.toSize()
+
+            val topLeft = Offset(
+                x = decor.topLeft.x - (newSize.width - oldSize.width) / 2f,
+                y = decor.topLeft.y - (newSize.height - oldSize.height) / 2f,
+            )
+
+            if (topLeft.x < borderMargin || topLeft.y < borderMargin) return false
+            if (topLeft.x + newSize.width > canvasSize!!.width - borderMargin) return false
+
+            selectedItem = decor.copy(
+                type = textDecor.copy(text = string),
+                topLeft = topLeft,
+                size = newSize,
+            )
+
+            return true
+        }
+
+        return false
+    }
+
+    fun finishEditMode() {
+        selectedItem?.let { decor ->
+
+            val textDecor = (decor.type as? DecorType.TextDecor) ?: return
+
+            if (textDecor.text.isEmpty()) {
+                onDeleteClick(decor.id)
+                selectedItem = null
+                isInTextEditMode = false
+                return
+            }
+
+            confirmChanges()
+            isInTextEditMode = false
+        }
+    }
 }
 
 @Composable
@@ -305,7 +382,7 @@ fun rememberMemeEditorState(
     memeTemplatePath: String,
     decorItems: List<MemeDecor>,
     borderColor: Color = Color.White,
-    borderMargin: Dp = 12.dp,
+    borderMargin: Dp = 4.dp,
     borderCornerRadius: Dp = 8.dp,
     deleteIcon: ImageVector = MemeIcons.DecorDelete,
     deleteIconSize: Dp = 24.dp,
