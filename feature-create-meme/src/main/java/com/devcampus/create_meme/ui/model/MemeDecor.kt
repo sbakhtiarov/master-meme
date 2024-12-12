@@ -10,8 +10,8 @@ import com.devcampus.create_meme.ui.common.MemeFonts
 data class MemeDecor(
     val id: String,
     val type: DecorType,
-    val topLeft: Offset? = null,
-    val size: Size? = null,
+    val topLeft: Offset,
+    val size: Size,
 )
 
 sealed interface DecorType {
@@ -28,3 +28,5 @@ sealed interface DecorType {
         }
     }
 }
+
+fun MemeDecor.textDecor(): DecorType.TextDecor? = this.type as? DecorType.TextDecor

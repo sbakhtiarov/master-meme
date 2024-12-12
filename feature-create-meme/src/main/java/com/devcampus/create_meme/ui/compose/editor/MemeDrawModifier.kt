@@ -36,7 +36,6 @@ fun Modifier.drawMemeDecor(
         }
 
         state.decorItems
-            .filterPlaced()
             .filter { it.id != state.dragItem?.id }
             .filter { it.id != state.selectedItem?.id }
             .forEach { decor -> drawDecor(decor, state) }
@@ -59,9 +58,6 @@ private fun DrawScope.drawDecorBorder(
     decor: MemeDecor,
     state: MemeEditorState,
 ) {
-    requireNotNull(decor.topLeft)
-    requireNotNull(decor.size)
-
     val borderRectSize = decor.size.copy(
         width = decor.size.width + 2 * state.borderMargin,
         height = decor.size.height + 2 * state.borderMargin
@@ -94,10 +90,6 @@ private fun DrawScope.drawDeleteButton(
     decor: MemeDecor,
     state: MemeEditorState,
 ) {
-
-    requireNotNull(decor.topLeft)
-    requireNotNull(decor.size)
-
     with(state.deleteIconPainter) {
         translate(
             left = decor.topLeft.x + decor.size.width + state.borderMargin - state.deleteIconSize / 2f,
@@ -112,9 +104,6 @@ private fun DrawScope.drawDecorType(
     decor: MemeDecor,
     state: MemeEditorState,
 ) {
-    requireNotNull(decor.topLeft)
-    requireNotNull(decor.size)
-
     when (decor.type) {
         is DecorType.TextDecor -> {
 
