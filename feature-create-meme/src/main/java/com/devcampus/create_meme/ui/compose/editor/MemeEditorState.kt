@@ -51,7 +51,7 @@ class MemeEditorState(
 
     var isInTextEditMode by mutableStateOf<Boolean>(false)
 
-    var canvasSize: Size? = null
+    var canvasSize: Size = Size.Unspecified
 
     fun onDragStart(offset: Offset) {
         dragItem = selectedItem?.takeIf { it.containsPosition(offset) }
@@ -60,29 +60,26 @@ class MemeEditorState(
 
     fun onDrag(dragOffset: Offset) {
         dragItem?.let { dragItem ->
-            canvasSize?.let { canvasSize ->
+            val newTopLeft = dragItem.topLeft + dragOffset
 
-                val newTopLeft = dragItem.topLeft + dragOffset
+            val left = newTopLeft.x.coerceIn(
+                minimumValue = borderMargin,
+                maximumValue = (canvasSize.width.toFloat() - dragItem.size.width - borderMargin).coerceAtLeast(borderMargin)
+            )
 
-                val left = newTopLeft.x.coerceIn(
-                    minimumValue = borderMargin,
-                    maximumValue = (canvasSize.width.toFloat() - dragItem.size.width - borderMargin).coerceAtLeast(borderMargin)
-                )
+            val top = newTopLeft.y.coerceIn(
+                minimumValue = borderMargin,
+                maximumValue = canvasSize.height.toFloat() - dragItem.size.height - borderMargin
+            )
 
-                val top = newTopLeft.y.coerceIn(
-                    minimumValue = borderMargin,
-                    maximumValue = canvasSize.height.toFloat() - dragItem.size.height - borderMargin
-                )
+            this@MemeEditorState.dragItem = dragItem.copy(topLeft = Offset(left, top))
 
-                this@MemeEditorState.dragItem = dragItem.copy(topLeft = Offset(left, top))
-
-                selectedItem?.let { selectedItem ->
-                    if (selectedItem.id == dragItem.id) {
-                        // Update selected item if dragging selected item
-                        this@MemeEditorState.selectedItem = selectedItem.copy(
-                            topLeft = Offset(left, top)
-                        )
-                    }
+            selectedItem?.let { selectedItem ->
+                if (selectedItem.id == dragItem.id) {
+                    // Update selected item if dragging selected item
+                    this@MemeEditorState.selectedItem = selectedItem.copy(
+                        topLeft = Offset(left, top)
+                    )
                 }
             }
         }
@@ -139,29 +136,26 @@ class MemeEditorState(
      * Measure size and set position for new decor before adding.
      */
     fun addTextDecor(text: String) {
-        canvasSize?.let { canvasSize ->
+        val size = textMeasurer.measure(
+            text = text,
+            style = TextStyle.Default.copy(
+                fontFamily = DecorType.TextDecor.DefaultFontFamily.fontFamily,
+                fontSize = DecorType.TextDecor.DefaultFontFamily.baseFontSize,
+            )).size
 
-            val size = textMeasurer.measure(
-                text = text,
-                style = TextStyle.Default.copy(
-                    fontFamily = DecorType.TextDecor.DefaultFontFamily.fontFamily,
-                    fontSize = DecorType.TextDecor.DefaultFontFamily.baseFontSize,
-                )).size
+        val decor = MemeDecor(
+            id = UUID.randomUUID().toString(),
+            type = DecorType.TextDecor(text),
+            topLeft = Offset(
+                x = canvasSize.center.x - size.center.x,
+                y = canvasSize.center.y - size.center.y,
+            ),
+            size = size.toSize(),
+        )
 
-            val decor = MemeDecor(
-                id = UUID.randomUUID().toString(),
-                type = DecorType.TextDecor(text),
-                topLeft = Offset(
-                    x = canvasSize.center.x - size.center.x,
-                    y = canvasSize.center.y - size.center.y,
-                ),
-                size = size.toSize(),
-            )
+        selectedItem = decor
 
-            selectedItem = decor
-
-            onDecorAdded(decor)
-        }
+        onDecorAdded(decor)
     }
 
     fun cancelChanges() {
@@ -217,7 +211,7 @@ class MemeEditorState(
             )
 
             if (topLeft.x < borderMargin || topLeft.y < borderMargin) return
-            if (topLeft.x + newSize.width > canvasSize!!.width - borderMargin) return
+            if (topLeft.x + newSize.width > canvasSize.width - borderMargin) return
 
             selectedItem = decor.copy(
                 type = textDecor.copy(fontScale = scale),
@@ -250,7 +244,7 @@ class MemeEditorState(
             )
 
             if (topLeft.x < borderMargin || topLeft.y < borderMargin) return false
-            if (topLeft.x + newSize.width > canvasSize!!.width - borderMargin) return false
+            if (topLeft.x + newSize.width > canvasSize.width - borderMargin) return false
 
             selectedItem = decor.copy(
                 type = textDecor.copy(text = newText),
