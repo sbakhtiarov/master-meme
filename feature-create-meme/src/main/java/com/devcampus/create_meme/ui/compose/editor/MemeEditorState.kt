@@ -291,7 +291,7 @@ class MemeEditorState(
             text = withText ?: textDecor.text,
             style = TextStyle.Default.copy(
                 fontFamily = withFont?.fontFamily ?: textDecor.fontFamily.fontFamily,
-                fontSize = textDecor.fontFamily.baseFontSize * (withFontScale ?: textDecor.fontScale),
+                fontSize = (withFont?.baseFontSize ?: textDecor.fontFamily.baseFontSize) * (withFontScale ?: textDecor.fontScale),
             )).size.toSize()
     }
 

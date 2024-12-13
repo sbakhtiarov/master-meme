@@ -120,8 +120,12 @@ fun CreateMemeScreen(
                 when(bottomBarType) {
                     BottomBarType.DEFAULT ->
                         DefaultBottomBar(
+                            isUndoAvailable = viewModel.undoActions.isNotEmpty(),
+                            isRedoAvailable = viewModel.redoActions.isNotEmpty(),
                             onAddClick = { editorState.addTextDecor(text = "TAP TWICE TO EDIT") },
-                            onSaveClick = { sendIntent(Intent.OnSaveMeme(templateAsset)) }
+                            onSaveClick = { sendIntent(Intent.OnSaveMeme(templateAsset)) },
+                            onUndoClick = { sendIntent(Intent.Undo) },
+                            onRedoClick = { sendIntent(Intent.Redo) },
                         )
                     BottomBarType.TEXT_OPTIONS ->
                         if (editorState.selectedItem != null) {

@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devcampus.create_meme.domain.MemeFileSaver
+import com.devcampus.create_meme.ui.model.EditorAction
 import com.devcampus.create_meme.ui.model.MemeDecor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -32,6 +33,9 @@ internal class CreateMemeViewModel @Inject constructor(
 
     val decorItems = mutableStateListOf<MemeDecor>()
 
+    val undoActions = mutableStateListOf<EditorAction>()
+    val redoActions = mutableStateListOf<EditorAction>()
+
     init {
         handleIntents()
     }
@@ -51,33 +55,77 @@ internal class CreateMemeViewModel @Inject constructor(
                 is Intent.OnDecorDeleted -> deleteDecor(intent.id)
                 is Intent.OnDecorMoved -> moveDecor(intent.id, intent.offset)
                 is Intent.OnDecorUpdated -> updateDecor(intent.decor)
+                Intent.Undo -> undoAction()
+                Intent.Redo -> redoAction()
             }
         }.launchIn(viewModelScope)
     }
 
-    private fun addDecor(decor: MemeDecor) {
-        decorItems.add(decor)
-    }
-
-    private fun updateDecor(decor: MemeDecor) {
-        decorItems.indexOfFirst { it.id == decor.id }.takeIf { it >= 0 }?.let { index ->
-            decorItems.set(
-                index = index,
-                element = decor
-            )
+    private fun undoAction() {
+        undoActions.removeLastOrNull()?.let { action ->
+            when (action) {
+                is EditorAction.DecorAdded -> deleteDecor(action.decor.id, undoAction = false)
+                is EditorAction.DecorRemoved -> addDecor(action.decor, undoAction = false)
+                is EditorAction.DecorMoved -> moveDecor(action.decor.id, action.decor.topLeft, undoAction = false)
+                is EditorAction.DecorUpdated -> updateDecor(action.decor, undoAction = false)
+            }
         }
     }
 
-    private fun deleteDecor(id: String) {
-        decorItems.removeAll { it.id == id }
+    private fun redoAction() {
+        redoActions.removeLastOrNull()?.let { action ->
+            when (action) {
+                is EditorAction.DecorAdded -> deleteDecor(action.decor.id)
+                is EditorAction.DecorRemoved -> addDecor(action.decor)
+                is EditorAction.DecorMoved -> moveDecor(action.decor.id, action.decor.topLeft)
+                is EditorAction.DecorUpdated -> updateDecor(action.decor)
+            }
+        }
     }
 
-    private fun moveDecor(id: String, offset: Offset) {
+    private fun addDecor(decor: MemeDecor, undoAction: Boolean = true) {
+        decorItems.add(decor)
+        updateUndoRedo(EditorAction.DecorAdded(decor), undoAction)
+    }
+
+    private fun updateDecor(newDecor: MemeDecor, undoAction: Boolean = true) {
+        decorItems.find { it.id == newDecor.id }?.let { decor ->
+            decorItems.set(
+                index = decorItems.indexOf(decor),
+                element = newDecor
+            )
+            if (newDecor.type != decor.type) {
+                updateUndoRedo(EditorAction.DecorUpdated(decor), undoAction)
+            }
+        }
+    }
+
+    private fun deleteDecor(id: String, undoAction: Boolean = true) {
+        decorItems.find { it.id == id }?.let { decor ->
+            decorItems.remove(decor)
+            updateUndoRedo(EditorAction.DecorRemoved(decor), undoAction)
+        }
+    }
+
+    private fun moveDecor(id: String, offset: Offset, undoAction: Boolean = true) {
         decorItems.indexOfFirst { it.id == id }.takeIf { it >= 0 }?.let { index ->
+
+            val decor = decorItems[index]
+
             decorItems.set(
                 index = index,
-                element = decorItems[index].copy(topLeft = offset)
+                element = decor.copy(topLeft = offset)
             )
+
+            updateUndoRedo(EditorAction.DecorMoved(decor), undoAction)
+        }
+    }
+
+    private fun updateUndoRedo(action: EditorAction, undoAction: Boolean) {
+        if (undoAction) {
+            undoActions.add(action)
+        } else {
+            redoActions.add(action)
         }
     }
 
@@ -104,4 +152,6 @@ internal sealed interface Intent {
     data class OnDecorUpdated(val decor: MemeDecor) : Intent
     data class OnDecorDeleted(val id: String) : Intent
     data class OnDecorMoved(val id: String, val offset: Offset) : Intent
+    data object Undo : Intent
+    data object Redo : Intent
 }

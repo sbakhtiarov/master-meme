@@ -1,5 +1,8 @@
 package com.devcampus.create_meme.ui.compose.bottombar
 
+import android.R.attr.contentDescription
+import android.R.attr.onClick
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,11 +19,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImagePainter.State.Empty.painter
 import com.devcampus.common_android.ui.theme.Primary
 import com.devcampus.create_meme.R
 
 @Composable
 fun DefaultBottomBar(
+    isUndoAvailable: Boolean,
+    isRedoAvailable: Boolean,
+    onUndoClick: () -> Unit,
+    onRedoClick: () -> Unit,
     onAddClick: () -> Unit,
     onSaveClick: () -> Unit,
 ) {
@@ -28,19 +36,25 @@ fun DefaultBottomBar(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Row {
                 Icon(
-                    modifier = Modifier.alpha(0.3f),
+                    modifier = Modifier
+                        .alpha(alpha = if (isUndoAvailable) 1f else 0.3f)
+                        .clickable(isUndoAvailable) { onUndoClick() },
                     painter = painterResource(R.drawable.ic_undo),
                     tint = Primary,
                     contentDescription = null,
                 )
                 Icon(
-                    modifier = Modifier.alpha(0.3f),
+                    modifier = Modifier
+                        .alpha(alpha = if (isRedoAvailable) 1f else 0.3f)
+                        .clickable(isRedoAvailable) { onRedoClick() },
                     painter = painterResource(R.drawable.ic_redo),
                     tint = Primary,
                     contentDescription = null
