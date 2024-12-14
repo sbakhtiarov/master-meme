@@ -29,19 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.devcampus.memes_list.R
+import com.devcampus.common_android.ui.MemeShare.showShareDialog
 import com.devcampus.memes_list.ui.DataState
 import com.devcampus.memes_list.ui.EmptyState
 import com.devcampus.memes_list.ui.Error
 import com.devcampus.memes_list.ui.Intent
 import com.devcampus.memes_list.ui.Loading
 import com.devcampus.memes_list.ui.MemeListViewModel
-import com.devcampus.memes_list.ui.MemeShare
 import com.devcampus.memes_list.ui.Share
 import com.devcampus.memes_list.ui.ShowDeletionConfirmation
 import com.devcampus.memes_list.ui.ShowErrorMessage
 import com.devcampus.memes_list.ui.isInSelectionMode
 import kotlinx.coroutines.flow.collectLatest
+import com.devcampus.common_android.R as CommonR
 
 @Composable
 fun MemesScreen(
@@ -147,10 +147,6 @@ fun MemesScreen(
     }
 }
 
-private fun showShareDialog(context: Context, paths: List<String>) {
-    MemeShare.showShareDialog(context, paths)
-}
-
 private fun showError(context: Context) {
-    Toast.makeText(context, R.string.common_error, Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, CommonR.string.common_error, Toast.LENGTH_SHORT).show()
 }

@@ -56,7 +56,22 @@ internal class CreateMemeViewModel @Inject constructor(
         intents.onEach { intent ->
             when (intent) {
                 Intent.OnBackPress -> sendAction(ShowLeaveConfirmation)
-                is Intent.OnSaveMeme -> saveMeme(intent.assetPath, intent.canvasSize, intent.density)
+                is Intent.OnSaveMeme ->
+                    saveMeme(
+                        assetPath = intent.assetPath,
+                        canvasSize = intent.canvasSize,
+                        density = intent.density,
+                        saveToCache = false,
+                        onSuccess = { sendAction(CloseScreen) }
+                    )
+                is Intent.OnShareMeme ->
+                    saveMeme(
+                        assetPath = intent.assetPath,
+                        canvasSize = intent.canvasSize,
+                        density = intent.density,
+                        saveToCache = true,
+                        onSuccess = { sendAction(Share(it)) }
+                    )
                 is Intent.OnDecorAdded -> addDecor(intent.decor)
                 is Intent.OnDecorDeleted -> deleteDecor(intent.id)
                 is Intent.OnDecorMoved -> moveDecor(intent.id, intent.offset)
@@ -135,9 +150,15 @@ internal class CreateMemeViewModel @Inject constructor(
         }
     }
 
-    private fun saveMeme(assetPath: String, canvasSize: Size, density: Density) {
+    private fun saveMeme(
+        assetPath: String,
+        canvasSize: Size,
+        density: Density,
+        saveToCache: Boolean,
+        onSuccess: (String) -> Unit
+    ) {
         viewModelScope.launch {
-            memeFileSaver.copyMemeAsset(
+            memeFileSaver.prepareMemeImage(
                 assetPath = assetPath,
                 editorCanvasSize = SizeF(canvasSize.width, canvasSize.height),
                 decorList = decorItems.map { item ->
@@ -151,9 +172,15 @@ internal class CreateMemeViewModel @Inject constructor(
                             isStroke = item.type.fontFamily.isStroke,
                         )
                     }
-                }
+                },
+                saveToCache = saveToCache,
             )
-            sendAction(CloseScreen)
+                .onSuccess { path ->
+                    onSuccess(path)
+                }
+                .onFailure {
+                    sendAction(ShowMemeCreateError)
+                }
         }
     }
 
@@ -164,11 +191,14 @@ internal class CreateMemeViewModel @Inject constructor(
 
 internal sealed interface Action
 data object ShowLeaveConfirmation : Action
+data object ShowMemeCreateError : Action
 data object CloseScreen : Action
+data class Share(val path: String) : Action
 
 internal sealed interface Intent {
     data object OnBackPress : Intent
     data class OnSaveMeme(val assetPath: String, val canvasSize: Size, val density: Density) : Intent
+    data class OnShareMeme(val assetPath: String, val canvasSize: Size, val density: Density) : Intent
     data class OnDecorAdded(val decor: MemeDecor) : Intent
     data class OnDecorUpdated(val decor: MemeDecor) : Intent
     data class OnDecorDeleted(val id: String) : Intent

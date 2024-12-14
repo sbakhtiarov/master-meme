@@ -49,10 +49,14 @@ private fun DrawScope.drawDecor(
     state: MemeEditorState,
     drawDeleteButton: Boolean = true,
 ) {
-    drawDecorBorder(decor, state)
 
-    if (drawDeleteButton && decor.id == state.selectedItem?.id) {
-        drawDeleteButton(decor, state)
+    if (decor.id == state.selectedItem?.id) {
+
+        drawDecorBorder(decor, state)
+
+        if (drawDeleteButton) {
+            drawDeleteButton(decor, state)
+        }
     }
 
     drawDecorType(decor, state)

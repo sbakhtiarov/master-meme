@@ -1,5 +1,7 @@
 package com.devcampus.create_meme.ui.compose
 
+import android.content.Context
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -28,22 +30,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.devcampus.common_android.ui.MemeShare.showShareDialog
 import com.devcampus.common_android.ui.theme.SurfaceContainer
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.CloseScreen
 import com.devcampus.create_meme.ui.CreateMemeViewModel
 import com.devcampus.create_meme.ui.Intent
 import com.devcampus.create_meme.ui.Intent.OnBackPress
+import com.devcampus.create_meme.ui.Share
 import com.devcampus.create_meme.ui.ShowLeaveConfirmation
+import com.devcampus.create_meme.ui.ShowMemeCreateError
 import com.devcampus.create_meme.ui.compose.bottombar.DefaultBottomBar
 import com.devcampus.create_meme.ui.compose.bottombar.TextOptionsBottomBar
+import com.devcampus.create_meme.ui.compose.dialog.ExitConfirmationDialog
+import com.devcampus.create_meme.ui.compose.dialog.SaveAndShareDialog
 import com.devcampus.create_meme.ui.compose.editor.MemeEditor
 import com.devcampus.create_meme.ui.compose.editor.rememberMemeEditorState
 import kotlinx.coroutines.flow.collectLatest
+import com.devcampus.common_android.R as CommonR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,10 +61,13 @@ fun CreateMemeScreen(
     onClickUp: () -> Unit,
 ) {
 
+    val context = LocalContext.current
+
     val viewModel : CreateMemeViewModel = hiltViewModel()
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
 
     var showLeaveConfirmation by remember { mutableStateOf(false) }
+    var showSaveConfirmation by remember { mutableStateOf(false) }
 
     val density = LocalDensity.current
 
@@ -126,11 +138,7 @@ fun CreateMemeScreen(
                             isUndoAvailable = viewModel.undoActions.isNotEmpty(),
                             isRedoAvailable = viewModel.redoActions.isNotEmpty(),
                             onAddClick = { editorState.addTextDecor() },
-                            onSaveClick = { sendIntent(Intent.OnSaveMeme(
-                                assetPath = templateAsset,
-                                canvasSize = editorState.canvasSize,
-                                density = density,
-                            )) },
+                            onSaveClick = { showSaveConfirmation = true },
                             onUndoClick = { sendIntent(Intent.Undo) },
                             onRedoClick = { sendIntent(Intent.Redo) },
                         )
@@ -145,7 +153,10 @@ fun CreateMemeScreen(
                                 onConfirm = { editorState.confirmChanges() }
                             )
                         } else {
-                            Box(Modifier.fillMaxWidth().height(100.dp))
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp))
                         }
                 }
             }
@@ -160,7 +171,7 @@ fun CreateMemeScreen(
     }
 
     if (showLeaveConfirmation) {
-        ConfirmationDialog(
+        ExitConfirmationDialog(
             onConfirm = {
                 showLeaveConfirmation = false
                 onClickUp()
@@ -171,14 +182,46 @@ fun CreateMemeScreen(
         )
     }
 
+    if (showSaveConfirmation) {
+        SaveAndShareDialog(
+            onDismissed = { showSaveConfirmation = false },
+            onSaveSelected = {
+                showSaveConfirmation = false
+                sendIntent(
+                    Intent.OnSaveMeme(
+                        assetPath = templateAsset,
+                        canvasSize = editorState.canvasSize,
+                        density = density,
+                    )
+                )
+            },
+            onShareSelected = {
+                showSaveConfirmation = false
+                sendIntent(
+                    Intent.OnShareMeme(
+                        assetPath = templateAsset,
+                        canvasSize = editorState.canvasSize,
+                        density = density,
+                    )
+                )
+            },
+        )
+    }
+
     LaunchedEffect(Unit) {
         viewModel.actions.collectLatest { action ->
             when (action) {
                 ShowLeaveConfirmation -> showLeaveConfirmation = true
                 CloseScreen -> onClickUp()
+                ShowMemeCreateError -> showError(context)
+                is Share -> showShareDialog(context, listOf(action.path))
             }
         }
     }
+}
+
+private fun showError(context: Context) {
+    Toast.makeText(context, CommonR.string.common_error, Toast.LENGTH_SHORT).show()
 }
 
 private enum class BottomBarType {

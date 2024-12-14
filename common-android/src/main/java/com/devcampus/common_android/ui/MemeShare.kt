@@ -1,15 +1,16 @@
-package com.devcampus.memes_list.ui
+package com.devcampus.common_android.ui
 
 import android.content.Context
+import android.content.Intent
 import androidx.core.content.FileProvider
 import java.io.File
 
 object MemeShare {
-
     fun showShareDialog(context: Context, paths: List<String>) {
-        val shareIntent = android.content.Intent().apply {
-            action = android.content.Intent.ACTION_SEND_MULTIPLE
-            putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, ArrayList(
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND_MULTIPLE
+            putParcelableArrayListExtra(
+                Intent.EXTRA_STREAM, ArrayList(
                 paths.mapNotNull {
                     try {
                         FileProvider.getUriForFile(
@@ -24,6 +25,6 @@ object MemeShare {
             ))
             type = "image/*"
         }
-        context.startActivity(android.content.Intent.createChooser(shareIntent, null))
+        context.startActivity(Intent.createChooser(shareIntent, null))
     }
 }

@@ -25,16 +25,21 @@ class MemeFileSaverImpl @Inject constructor(
         private const val MEMES_FOLDER = "memes"
     }
 
-    override suspend fun copyMemeAsset(
+    override suspend fun prepareMemeImage(
         assetPath: String,
         editorCanvasSize: SizeF,
         decorList: List<Decor>,
-    ) {
+        saveToCache: Boolean
+    ) = runCatching {
         withContext(Dispatchers.IO) {
 
             val assetName = assetPath.split("/").last()
 
-            val memesDirectory = File(context.getExternalFilesDir(null), MEMES_FOLDER)
+            val memesDirectory = if (saveToCache) {
+                File(context.externalCacheDir, MEMES_FOLDER)
+            } else {
+                File(context.getExternalFilesDir(null), MEMES_FOLDER)
+            }
             val destFile = File(memesDirectory, "meme_${UUID.randomUUID()}_$assetName")
 
             memesDirectory.mkdirs()
@@ -81,6 +86,8 @@ class MemeFileSaverImpl @Inject constructor(
             destFile.outputStream().use { output ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
             }
+
+            destFile.absolutePath
         }
     }
 }

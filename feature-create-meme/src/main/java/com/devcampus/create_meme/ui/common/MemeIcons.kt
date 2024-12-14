@@ -72,4 +72,65 @@ object MemeIcons {
         }
 
     private var _IconDelete: ImageVector? = null
+
+    val SimCardDownload: ImageVector
+        get() {
+            if (_Sim_card_download != null) {
+                return _Sim_card_download!!
+            }
+            _Sim_card_download = ImageVector.Builder(
+                name = "Sim_card_download",
+                defaultWidth = 24.dp,
+                defaultHeight = 24.dp,
+                viewportWidth = 960f,
+                viewportHeight = 960f
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                    fillAlpha = 1.0f,
+                    stroke = null,
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 1.0f,
+                    strokeLineCap = StrokeCap.Butt,
+                    strokeLineJoin = StrokeJoin.Miter,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(480f, 680f)
+                    lineToRelative(160f, -160f)
+                    lineToRelative(-56f, -56f)
+                    lineToRelative(-64f, 62f)
+                    verticalLineToRelative(-166f)
+                    horizontalLineToRelative(-80f)
+                    verticalLineToRelative(166f)
+                    lineToRelative(-64f, -62f)
+                    lineToRelative(-56f, 56f)
+                    close()
+                    moveTo(240f, 880f)
+                    quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                    reflectiveQuadTo(160f, 800f)
+                    verticalLineToRelative(-480f)
+                    lineToRelative(240f, -240f)
+                    horizontalLineToRelative(320f)
+                    quadToRelative(33f, 0f, 56.5f, 23.5f)
+                    reflectiveQuadTo(800f, 160f)
+                    verticalLineToRelative(640f)
+                    quadToRelative(0f, 33f, -23.5f, 56.5f)
+                    reflectiveQuadTo(720f, 880f)
+                    close()
+                    moveToRelative(0f, -80f)
+                    horizontalLineToRelative(480f)
+                    verticalLineToRelative(-640f)
+                    horizontalLineTo(434f)
+                    lineTo(240f, 354f)
+                    close()
+                    moveToRelative(0f, 0f)
+                    horizontalLineToRelative(480f)
+                    close()
+                }
+            }.build()
+            return _Sim_card_download!!
+        }
+
+    private var _Sim_card_download: ImageVector? = null
 }

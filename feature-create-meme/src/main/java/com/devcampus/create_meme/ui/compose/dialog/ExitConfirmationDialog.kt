@@ -1,4 +1,4 @@
-package com.devcampus.create_meme.ui.compose
+package com.devcampus.create_meme.ui.compose.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +24,7 @@ import com.devcampus.create_meme.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ConfirmationDialog(
+internal fun ExitConfirmationDialog(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
