@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.common.MemeFontFamily
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
@@ -37,6 +39,7 @@ class MemeEditorState(
     val borderCornerRadius: CornerRadius,
     val deleteIconPainter: VectorPainter,
     val deleteIconSize: Float,
+    val defaultMemeText: String,
     val onDecorAdded: (MemeDecor) -> Unit,
     val onDeleteClick: (String) -> Unit,
     val onDecorMoved: (String, Offset) -> Unit,
@@ -119,13 +122,16 @@ class MemeEditorState(
 
     fun onDoubleTap(offset: Offset) {
         if (!isInTextEditMode) {
+
+            selectedItem?.containsPosition(offset) { decor ->
+                selectedItem?.let { confirmChanges() }
+                selectedItem = decor
+                isInTextEditMode = true
+                return
+            }
+
             decorItems.find { it.containsPosition(offset) }?.let { decor ->
-
-                if (selectedItem != decor) {
-                    selectedItem?.let { confirmChanges() }
-                    selectedItem = decor
-                }
-
+                selectedItem = decor
                 isInTextEditMode = true
             }
         }
@@ -135,9 +141,9 @@ class MemeEditorState(
      * Add new text decor
      * Measure size and set position for new decor before adding.
      */
-    fun addTextDecor(text: String) {
+    fun addTextDecor() {
         val size = textMeasurer.measure(
-            text = text,
+            text = defaultMemeText,
             style = TextStyle.Default.copy(
                 fontFamily = DecorType.TextDecor.DefaultFontFamily.fontFamily,
                 fontSize = DecorType.TextDecor.DefaultFontFamily.baseFontSize,
@@ -145,7 +151,7 @@ class MemeEditorState(
 
         val decor = MemeDecor(
             id = UUID.randomUUID().toString(),
-            type = DecorType.TextDecor(text),
+            type = DecorType.TextDecor(defaultMemeText),
             topLeft = Offset(
                 x = canvasSize.center.x - size.center.x,
                 y = canvasSize.center.y - size.center.y,
@@ -347,6 +353,7 @@ fun rememberMemeEditorState(
     val borderMargin = borderMargin.toPx()
     val borderCornerRadius = CornerRadius(borderCornerRadius.toPx())
     val deleteIconSize = deleteIconSize.toPx()
+    val defaultMemeText = stringResource(R.string.tap_twice_to_edit)
 
     return remember(
         memeTemplatePath,
@@ -367,6 +374,7 @@ fun rememberMemeEditorState(
             borderCornerRadius = borderCornerRadius,
             deleteIconPainter = deleteIconPainter,
             deleteIconSize = deleteIconSize,
+            defaultMemeText = defaultMemeText,
             onDecorAdded = onDecorAdded,
             onDeleteClick = onDeleteClick,
             onDecorMoved = onDecorMoved,

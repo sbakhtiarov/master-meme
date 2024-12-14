@@ -1,10 +1,16 @@
 package com.devcampus.create_meme.ui
 
+import android.util.SizeF
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Density
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.devcampus.create_meme.domain.Decor
 import com.devcampus.create_meme.domain.MemeFileSaver
+import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.EditorAction
 import com.devcampus.create_meme.ui.model.MemeDecor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,7 +56,7 @@ internal class CreateMemeViewModel @Inject constructor(
         intents.onEach { intent ->
             when (intent) {
                 Intent.OnBackPress -> sendAction(ShowLeaveConfirmation)
-                is Intent.OnSaveMeme -> saveMeme(intent.assetPath)
+                is Intent.OnSaveMeme -> saveMeme(intent.assetPath, intent.canvasSize, intent.density)
                 is Intent.OnDecorAdded -> addDecor(intent.decor)
                 is Intent.OnDecorDeleted -> deleteDecor(intent.id)
                 is Intent.OnDecorMoved -> moveDecor(intent.id, intent.offset)
@@ -129,9 +135,24 @@ internal class CreateMemeViewModel @Inject constructor(
         }
     }
 
-    private fun saveMeme(assetPath: String) {
+    private fun saveMeme(assetPath: String, canvasSize: Size, density: Density) {
         viewModelScope.launch {
-            memeFileSaver.copyMemeAsset(assetPath)
+            memeFileSaver.copyMemeAsset(
+                assetPath = assetPath,
+                editorCanvasSize = SizeF(canvasSize.width, canvasSize.height),
+                decorList = decorItems.map { item ->
+                    when (item.type) {
+                        is DecorType.TextDecor -> Decor.TextDecor(
+                            topLeft = item.topLeft,
+                            text = item.type.text,
+                            fontResId = item.type.fontFamily.fontResId,
+                            fontSize = with(density) { item.type.fontFamily.baseFontSize.toPx() * item.type.fontScale },
+                            color = item.type.fontColor.toArgb(),
+                            isStroke = item.type.fontFamily.isStroke,
+                        )
+                    }
+                }
+            )
             sendAction(CloseScreen)
         }
     }
@@ -147,7 +168,7 @@ data object CloseScreen : Action
 
 internal sealed interface Intent {
     data object OnBackPress : Intent
-    data class OnSaveMeme(val assetPath: String) : Intent
+    data class OnSaveMeme(val assetPath: String, val canvasSize: Size, val density: Density) : Intent
     data class OnDecorAdded(val decor: MemeDecor) : Intent
     data class OnDecorUpdated(val decor: MemeDecor) : Intent
     data class OnDecorDeleted(val id: String) : Intent

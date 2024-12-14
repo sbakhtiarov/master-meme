@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -55,6 +56,8 @@ fun CreateMemeScreen(
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
 
     var showLeaveConfirmation by remember { mutableStateOf(false) }
+
+    val density = LocalDensity.current
 
     val editorState = rememberMemeEditorState(
         memeTemplatePath = templateAsset,
@@ -122,8 +125,12 @@ fun CreateMemeScreen(
                         DefaultBottomBar(
                             isUndoAvailable = viewModel.undoActions.isNotEmpty(),
                             isRedoAvailable = viewModel.redoActions.isNotEmpty(),
-                            onAddClick = { editorState.addTextDecor(text = "TAP TWICE TO EDIT") },
-                            onSaveClick = { sendIntent(Intent.OnSaveMeme(templateAsset)) },
+                            onAddClick = { editorState.addTextDecor() },
+                            onSaveClick = { sendIntent(Intent.OnSaveMeme(
+                                assetPath = templateAsset,
+                                canvasSize = editorState.canvasSize,
+                                density = density,
+                            )) },
                             onUndoClick = { sendIntent(Intent.Undo) },
                             onRedoClick = { sendIntent(Intent.Redo) },
                         )
