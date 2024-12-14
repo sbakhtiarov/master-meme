@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
@@ -146,10 +147,19 @@ fun MemeEditor(
                         capitalization = KeyboardCapitalization.Characters
                     ),
                     singleLine = true,
-                    textStyle = TextStyle.Default.copy(
-                        fontFamily = decor.type.fontFamily.fontFamily,
-                        fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
-                    ),
+                    textStyle = if (decor.type.fontFamily.isStroke) {
+                        TextStyle.Default.copy(
+                            fontFamily = decor.type.fontFamily.fontFamily,
+                            fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
+                            drawStyle = Stroke(width = 2f),
+                            color = Color.Black,
+                        )
+                    } else {
+                        TextStyle.Default.copy(
+                            fontFamily = decor.type.fontFamily.fontFamily,
+                            fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
+                        )
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = textDecor.fontColor,
                         unfocusedTextColor = textDecor.fontColor,
