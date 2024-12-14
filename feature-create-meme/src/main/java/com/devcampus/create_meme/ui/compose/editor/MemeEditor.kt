@@ -147,28 +147,20 @@ fun MemeEditor(
                         capitalization = KeyboardCapitalization.Characters
                     ),
                     singleLine = true,
-                    textStyle = if (decor.type.fontFamily.isStroke) {
-                        TextStyle.Default.copy(
-                            fontFamily = decor.type.fontFamily.fontFamily,
-                            fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
-                            drawStyle = Stroke(width = 2f),
-                            color = Color.Black,
-                        )
-                    } else {
-                        TextStyle.Default.copy(
-                            fontFamily = decor.type.fontFamily.fontFamily,
-                            fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
-                        )
-                    },
+                    textStyle = TextStyle.Default.copy(
+                        fontFamily = decor.type.fontFamily.fontFamily,
+                        fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
+                        color = Color.Transparent,
+                    ),
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = textDecor.fontColor,
-                        unfocusedTextColor = textDecor.fontColor,
+                        focusedTextColor = Color.Transparent,
+                        unfocusedTextColor = Color.Transparent,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
                         errorContainerColor = Color.Transparent,
-                        focusedIndicatorColor = textDecor.fontColor,
-                        unfocusedIndicatorColor = textDecor.fontColor,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
                     )
                 )
 

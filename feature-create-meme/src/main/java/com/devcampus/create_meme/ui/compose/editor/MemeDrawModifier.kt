@@ -30,9 +30,11 @@ fun Modifier.drawMemeDecor(
         }
 
         state.selectedItem?.let { decor ->
-            if (state.isInTextEditMode.not()) {
-                drawDecor(decor, state)
-            }
+            drawDecor(
+                decor = decor,
+                state = state,
+                drawDeleteButton = state.isInTextEditMode.not()
+            )
         }
 
         state.decorItems
@@ -45,9 +47,11 @@ fun Modifier.drawMemeDecor(
 private fun DrawScope.drawDecor(
     decor: MemeDecor,
     state: MemeEditorState,
+    drawDeleteButton: Boolean = true,
 ) {
-    if (decor.id == state.selectedItem?.id) {
-        drawDecorBorder(decor, state)
+    drawDecorBorder(decor, state)
+
+    if (drawDeleteButton && decor.id == state.selectedItem?.id) {
         drawDeleteButton(decor, state)
     }
 
