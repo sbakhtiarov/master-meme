@@ -6,6 +6,7 @@
     <string name="delete_memes_message">You will not be able to restore them. If you\'re fine with that, press \'Delete\'.</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="empty_screen_message">Tap + button to create your first meme</string>
 
     <plurals name="delete_memes_title">
         <item quantity="one">Delete %1$s meme?</item>

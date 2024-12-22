@@ -115,16 +115,20 @@ internal class MemeListViewModel @Inject constructor(
     }
 
     private fun handleMemeClick(meme: Meme) {
-        (_state.value as? DataState)?.selection?.let { selection ->
-            updateState<DataState> {
-                val newSelection = if (selection.contains(meme)) {
-                    (selection - meme).ifEmpty { null }
-                } else {
-                    selection + meme
-                }
+        if (isInSelectionMode()) {
+            (_state.value as? DataState)?.selection?.let { selection ->
+                updateState<DataState> {
+                    val newSelection = if (selection.contains(meme)) {
+                        (selection - meme).ifEmpty { null }
+                    } else {
+                        selection + meme
+                    }
 
-                copy(selection = newSelection)
+                    copy(selection = newSelection)
+                }
             }
+        } else {
+            sendAction(ShowMeme(meme))
         }
     }
 
@@ -173,6 +177,8 @@ internal class MemeListViewModel @Inject constructor(
     private fun sendAction(action: Action) {
         viewModelScope.launch { _actions.send(action) }
     }
+
+    private fun isInSelectionMode() = _state.value.isInSelectionMode()
 }
 
 internal sealed interface ViewState
@@ -201,5 +207,6 @@ internal sealed interface Action
 data object ShowErrorMessage : Action
 data object ShowDeletionConfirmation : Action
 data class Share(val paths: List<String>) : Action
+data class ShowMeme(val meme: Meme) : Action
 
 internal fun ViewState.isInSelectionMode() = (this as? DataState)?.selection != null

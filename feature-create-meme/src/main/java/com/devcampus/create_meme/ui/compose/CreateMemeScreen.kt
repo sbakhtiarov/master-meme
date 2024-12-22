@@ -39,7 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.devcampus.common_android.ui.MemeShare.showShareDialog
-import com.devcampus.common_android.ui.theme.SurfaceContainer
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.CloseScreen
 import com.devcampus.create_meme.ui.CreateMemeViewModel
@@ -122,7 +122,7 @@ fun CreateMemeScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors().copy(
-                    containerColor = SurfaceContainer
+                    containerColor = colorsScheme().surfaceContainerLow
                 ),
             )
         },

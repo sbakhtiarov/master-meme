@@ -42,8 +42,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.transformations
 import coil3.transform.RoundedCornersTransformation
-import com.devcampus.common_android.ui.theme.Primary
-import com.devcampus.common_android.ui.theme.ScrimColorStart
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.memes_list.domain.model.Meme
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
@@ -67,6 +66,7 @@ internal fun MemeGridItem(
     ) {
 
         val context = LocalContext.current
+        val scrimColorStart = colorsScheme().scrimColorStart
 
         val model by remember {
             mutableStateOf(
@@ -82,12 +82,12 @@ internal fun MemeGridItem(
                 .fillMaxSize()
                 .drawWithCache {
                     val selectionGradient = Brush.radialGradient(
-                        colors = listOf(ScrimColorStart, Color.Transparent),
+                        colors = listOf(scrimColorStart, Color.Transparent),
                         center = Offset(size.width, 0f),
                         radius = size.width / 2f,
                     )
                     val favouriteGradient = Brush.radialGradient(
-                        colors = listOf(ScrimColorStart, Color.Transparent),
+                        colors = listOf(scrimColorStart, Color.Transparent),
                         center = Offset(size.width, size.height),
                         radius = size.width / 2f,
                     )
@@ -169,7 +169,7 @@ private fun IconUnselected() {
             .border(
                 width = 2.dp,
                 shape = CircleShape,
-                color = Primary,
+                color = colorsScheme().primary,
             ),
     )
 }
@@ -181,7 +181,7 @@ private fun IconSelected() {
             .padding(12.dp)
             .size(24.dp),
         imageVector = Icons.Filled.CheckCircle,
-        tint = Primary,
+        tint = colorsScheme().primary,
         contentDescription = null
     )
 }
@@ -193,7 +193,7 @@ private fun IconFavoriteOutline(modifier: Modifier = Modifier) {
             .padding(12.dp)
             .size(24.dp),
         imageVector = Icons.Filled.FavoriteBorder,
-        tint = Primary,
+        tint = colorsScheme().primary,
         contentDescription = null
     )
 }
@@ -205,7 +205,7 @@ private fun IconFavoriteFilled(modifier: Modifier = Modifier) {
             .padding(12.dp)
             .size(24.dp),
         imageVector = Icons.Filled.Favorite,
-        tint = Primary,
+        tint = colorsScheme().primary,
         contentDescription = null
     )
 }

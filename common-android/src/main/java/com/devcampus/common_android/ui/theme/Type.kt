@@ -18,6 +18,14 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = FontFamily(
+            Font(R.font.manrope_regular, FontWeight.Normal)
+        ),
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        letterSpacing = 0.1.sp,
     )
     /* Other default text styles to override
     titleLarge = TextStyle(

@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.devcampus.common_android.ui.theme.BottomSheetScrimColorStart
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.meme_templates.ui.MemeTemplatesViewModel
 import kotlinx.coroutines.launch
 
@@ -62,6 +62,8 @@ fun MemeTemplatesBottomSheet(
         skipPartiallyExpanded = false
     )
 
+    val scrimColor = colorsScheme().surfaceContainerLowest
+
     ModalBottomSheet(
         modifier = Modifier
             .fillMaxHeight()
@@ -70,7 +72,7 @@ fun MemeTemplatesBottomSheet(
             .drawWithCache {
 
                 val selectionGradient = Brush.linearGradient(
-                    colors = listOf(BottomSheetScrimColorStart, Color.Transparent),
+                    colors = listOf(scrimColor, Color.Transparent),
                     start = Offset(0f, size.height),
                     end = Offset(0f, size.height - size.height / 6f)
                 )
@@ -103,6 +105,7 @@ fun MemeTemplatesBottomSheet(
                         templatesCount = viewState.templates.size,
                         onDismissed = {
                             isInSearchMode = false
+                            viewModel.onQueryUpdate("")
                         },
                         onQueryUpdate = {
                             viewModel.onQueryUpdate(it)

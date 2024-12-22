@@ -24,8 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
-import com.devcampus.common_android.ui.theme.Purple80
-import com.devcampus.common_android.ui.theme.TextOutline
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.create_meme.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +83,7 @@ private fun DialogButton(
                 .size(28.dp)
                 .align(Alignment.CenterVertically),
             imageVector = icon,
-            tint = Purple80,
+            tint = colorsScheme().secondaryFixedDim,
             contentDescription = null
         )
 
@@ -97,12 +96,12 @@ private fun DialogButton(
                 text = title,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = Purple80,
+                color = colorsScheme().secondaryFixedDim,
             )
             Text(
                 text = subtitle,
                 fontSize = 12.sp,
-                color = TextOutline,
+                color = colorsScheme().textOutline,
             )
         }
     }

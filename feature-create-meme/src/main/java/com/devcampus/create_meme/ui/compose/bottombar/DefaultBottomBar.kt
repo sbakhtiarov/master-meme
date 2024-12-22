@@ -1,7 +1,5 @@
 package com.devcampus.create_meme.ui.compose.bottombar
 
-import android.R.attr.contentDescription
-import android.R.attr.onClick
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -10,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,8 +18,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImagePainter.State.Empty.painter
-import com.devcampus.common_android.ui.theme.Primary
 import com.devcampus.create_meme.R
 
 @Composable
@@ -48,7 +45,7 @@ fun DefaultBottomBar(
                         .alpha(alpha = if (isUndoAvailable) 1f else 0.3f)
                         .clickable(isUndoAvailable) { onUndoClick() },
                     painter = painterResource(R.drawable.ic_undo),
-                    tint = Primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = null,
                 )
                 Icon(
@@ -56,7 +53,7 @@ fun DefaultBottomBar(
                         .alpha(alpha = if (isRedoAvailable) 1f else 0.3f)
                         .clickable(isRedoAvailable) { onRedoClick() },
                     painter = painterResource(R.drawable.ic_redo),
-                    tint = Primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = null
                 )
             }

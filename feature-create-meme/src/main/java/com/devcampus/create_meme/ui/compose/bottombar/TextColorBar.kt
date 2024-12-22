@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.devcampus.common_android.ui.theme.Selection
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.create_meme.ui.common.MemeColors
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
@@ -73,7 +73,7 @@ fun TextColorBar(
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize()
-                            .background(color = Selection, shape = CircleShape)
+                            .background(color = colorsScheme().onSurfaceSelection, shape = CircleShape)
                     )
                 }
 

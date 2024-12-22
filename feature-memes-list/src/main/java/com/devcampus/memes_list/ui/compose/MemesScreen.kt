@@ -10,6 +10,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -17,10 +18,13 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,10 +33,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.devcampus.common_android.ui.MemeShare.showShareDialog
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.memes_list.ui.DataState
 import com.devcampus.memes_list.ui.EmptyState
 import com.devcampus.memes_list.ui.Error
@@ -42,6 +49,7 @@ import com.devcampus.memes_list.ui.MemeListViewModel
 import com.devcampus.memes_list.ui.Share
 import com.devcampus.memes_list.ui.ShowDeletionConfirmation
 import com.devcampus.memes_list.ui.ShowErrorMessage
+import com.devcampus.memes_list.ui.ShowMeme
 import com.devcampus.memes_list.ui.isInSelectionMode
 import kotlinx.coroutines.flow.collectLatest
 import com.devcampus.common_android.R as CommonR
@@ -51,7 +59,7 @@ import com.devcampus.common_android.R as CommonR
 fun MemesScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    onMemeClick: (String) -> Unit,
+    showMemePreview: (String) -> Unit,
     onAddClick: () -> Unit,
 ) {
 
@@ -94,8 +102,20 @@ fun MemesScreen(
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
-                FloatingActionButton(
-                    modifier = Modifier.padding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal).asPaddingValues()),
+                IconButton(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(
+                            WindowInsets.navigationBars
+                                .only(WindowInsetsSides.Horizontal)
+                                .asPaddingValues()
+                        )
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(colorsScheme().fabGradientStart, colorsScheme().fabGradientEnd)
+                            ),
+                            shape = RoundedCornerShape(14.dp)
+                        ),
                     onClick = {
                         onAddClick()
                     },
@@ -103,6 +123,7 @@ fun MemesScreen(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -118,7 +139,7 @@ fun MemesScreen(
                         selection = state.selection,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedContentScope = animatedContentScope,
-                        onItemClick = { onMemeClick(it.path) },
+                        onItemClick = { sendIntent(Intent.OnMemeClick(it)) },
                         onItemLongClick = { sendIntent(Intent.OnMemeLongClick(it)) },
                         onItemFavouriteClick = { sendIntent(Intent.OnMemeFavouriteClick(it)) },
                     )
@@ -151,6 +172,7 @@ fun MemesScreen(
                 is ShowDeletionConfirmation -> showDeleteConfirmation = true
                 is ShowErrorMessage -> showError(context)
                 is Share -> showShareDialog(context, action.paths)
+                is ShowMeme -> showMemePreview(action.meme.path)
             }
         }
     }

@@ -11,10 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
-import com.devcampus.common_android.ui.theme.TextOutline
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.memes_list.R
 
 @Composable
@@ -29,8 +30,8 @@ internal fun EmptyScreen() {
         Image(painter = painterResource(R.drawable.memes_empty), contentDescription = null)
         Spacer(modifier = Modifier.height(32.dp))
         Text(
-            text = "Tap + button to create your first meme",
-            color = TextOutline
+            text = stringResource(R.string.empty_screen_message),
+            color = colorsScheme().textOutline,
         )
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devcampus.common_android.ui.theme.SurfaceContainer
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.memes_list.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +35,7 @@ internal fun DefaultAppBar(
             )
         },
         colors = TopAppBarDefaults.topAppBarColors().copy(
-            containerColor = SurfaceContainer
+            containerColor = colorsScheme().surfaceContainerLow,
         ),
         actions = {
             SortOptionsDropdown(sortModeSelection, onSortModeSelected)
