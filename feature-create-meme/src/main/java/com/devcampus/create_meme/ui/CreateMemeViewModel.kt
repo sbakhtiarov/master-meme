@@ -2,6 +2,7 @@ package com.devcampus.create_meme.ui
 
 import android.util.SizeF
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toArgb
@@ -42,6 +43,8 @@ internal class CreateMemeViewModel @Inject constructor(
     val undoActions = mutableStateListOf<EditorAction>()
     val redoActions = mutableStateListOf<EditorAction>()
 
+    val savedMemePath = mutableStateOf("")
+
     init {
         handleIntents()
     }
@@ -62,7 +65,10 @@ internal class CreateMemeViewModel @Inject constructor(
                         canvasSize = intent.canvasSize,
                         density = intent.density,
                         saveToCache = false,
-                        onSuccess = { sendAction(CloseScreen) }
+                        onSuccess = {
+                            savedMemePath.value = it
+                            sendAction(CloseScreen)
+                        }
                     )
                 is Intent.OnShareMeme ->
                     saveMeme(

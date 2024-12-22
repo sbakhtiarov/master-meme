@@ -4,7 +4,10 @@ import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -43,8 +46,12 @@ import com.devcampus.memes_list.ui.isInSelectionMode
 import kotlinx.coroutines.flow.collectLatest
 import com.devcampus.common_android.R as CommonR
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MemesScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    onMemeClick: (String) -> Unit,
     onAddClick: () -> Unit,
 ) {
 
@@ -109,7 +116,9 @@ fun MemesScreen(
                     MemeContentScreen(
                         memes = state.memes,
                         selection = state.selection,
-                        onItemClick = { sendIntent(Intent.OnMemeClick(it)) },
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedContentScope = animatedContentScope,
+                        onItemClick = { onMemeClick(it.path) },
                         onItemLongClick = { sendIntent(Intent.OnMemeLongClick(it)) },
                         onItemFavouriteClick = { sendIntent(Intent.OnMemeFavouriteClick(it)) },
                     )

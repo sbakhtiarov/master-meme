@@ -1,6 +1,9 @@
 package com.devcampus.memes_list.ui.compose
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -12,10 +15,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.devcampus.memes_list.domain.model.Meme
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun MemeContentScreen(
     memes: List<Meme>,
     selection: List<Meme>?,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     onItemClick: (Meme) -> Unit,
     onItemLongClick: (Meme) -> Unit,
     onItemFavouriteClick: (Meme) -> Unit,
@@ -38,14 +44,21 @@ internal fun MemeContentScreen(
             items = memes,
             key = { it.path }
         ) { meme ->
-            MemeGridItem(
-                modifier = Modifier.animateItem(),
-                meme = meme,
-                isSelected = { selection?.contains(meme) },
-                onClick = { onItemClick(meme) },
-                onLongClick = { onItemLongClick(meme) },
-                onFavouriteClick = { onItemFavouriteClick(meme) }
-            )
+            with (sharedTransitionScope) {
+                MemeGridItem(
+                    modifier = Modifier
+                        .animateItem()
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "meme-${meme.path}"),
+                            animatedVisibilityScope = animatedContentScope
+                        ),
+                    meme = meme,
+                    isSelected = { selection?.contains(meme) },
+                    onClick = { onItemClick(meme) },
+                    onLongClick = { onItemLongClick(meme) },
+                    onFavouriteClick = { onItemFavouriteClick(meme) }
+                )
+            }
         }
     }
 }

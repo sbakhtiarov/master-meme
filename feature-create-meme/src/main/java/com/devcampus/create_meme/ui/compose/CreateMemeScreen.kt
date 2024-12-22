@@ -4,6 +4,9 @@ import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -54,9 +57,11 @@ import com.devcampus.create_meme.ui.compose.editor.rememberMemeEditorState
 import kotlinx.coroutines.flow.collectLatest
 import com.devcampus.common_android.R as CommonR
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun CreateMemeScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     templateAsset: String,
     onClickUp: () -> Unit,
 ) {
@@ -167,6 +172,9 @@ fun CreateMemeScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             state = editorState,
+            savedMemePath = viewModel.savedMemePath.value,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
         )
     }
 
