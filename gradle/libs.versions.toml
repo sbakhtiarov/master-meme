@@ -1,18 +1,18 @@
 [versions]
-agp = "8.7.2"
+agp = "8.7.3"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.11.00"
+composeBom = "2024.12.01"
 appcompat = "1.7.0"
 material = "1.12.0"
 hilt = "2.51.1"
 hiltNavigation = "1.2.0"
 coil = "3.0.4"
 datastore = "1.1.1"
-kotlinx_serialization = "1.6.3"
-navigation = "2.8.4"
+kotlinx_serialization = "1.7.3"
+navigation = "2.8.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
