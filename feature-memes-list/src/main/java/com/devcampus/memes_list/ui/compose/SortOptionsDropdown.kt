@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.memes_list.R
 
 @Composable
@@ -42,7 +43,10 @@ internal fun SortOptionsDropdown(
                 expanded = true
             }
         ) {
-            Text(text = menuItems[selectedItem])
+            Text(
+                text = menuItems[selectedItem],
+                color = colorsScheme().secondaryFixedDim
+            )
             Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
         }
 
@@ -52,7 +56,10 @@ internal fun SortOptionsDropdown(
         ) {
             menuItems.forEachIndexed { index, text ->
                 DropdownMenuItem(
-                    text = { Text(text = text) },
+                    text = { Text(
+                        text = text,
+                        color = colorsScheme().secondaryFixedDim
+                    ) },
                     onClick = {
                         onSortOptionSelected(index)
                         expanded = false
