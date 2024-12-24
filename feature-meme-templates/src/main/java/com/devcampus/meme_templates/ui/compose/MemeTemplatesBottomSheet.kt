@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.meme_templates.ui.MemeTemplatesViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +49,6 @@ fun MemeTemplatesBottomSheet(
     onSelected: (String) -> Unit,
     onDismissed: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
 
     val viewModel: MemeTemplatesViewModel = hiltViewModel()
     val viewState by viewModel.state.collectAsStateWithLifecycle()
@@ -59,7 +56,7 @@ fun MemeTemplatesBottomSheet(
     var isInSearchMode by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
+        skipPartiallyExpanded = true
     )
 
     val scrimColor = colorsScheme().surfaceContainerLowest
@@ -114,10 +111,7 @@ fun MemeTemplatesBottomSheet(
                 } else {
                     DefaultTopBar(
                         onSearchClick = {
-                            scope.launch {
-                                sheetState.expand()
-                                isInSearchMode = true
-                            }
+                            isInSearchMode = true
                         }
                     )
                 }
