@@ -32,10 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.devcampus.common_android.ui.conditional
+import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.common.MemeFontFamily
 import com.devcampus.create_meme.ui.model.DecorType
@@ -172,7 +176,8 @@ private fun Modifier.optionButton(
     onClick: () -> Unit,
     isEnabled: Boolean = true,
 ) : Modifier {
-    return this then Modifier.size(44.dp)
+    return this then Modifier
+        .size(44.dp)
         .conditional(isSelected()) {
             Modifier.background(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -184,4 +189,24 @@ private fun Modifier.optionButton(
         .conditional(!isEnabled) {
             alpha(0.2f)
         }
+}
+
+@Preview
+@Composable
+private fun PreviewTextOptionsBar() {
+    MasterMemeTheme {
+        TextOptionsBottomBar(
+            decor = MemeDecor(
+                id = "",
+                topLeft = Offset(0f, 0f),
+                size = Size(0f, 0f),
+                type = DecorType.TextDecor("")
+            ),
+            onFontSelected = {},
+            onFontColorSelected = {},
+            onFontScaleSelected = {},
+            onCancel = {},
+            onConfirm = {},
+        )
+    }
 }

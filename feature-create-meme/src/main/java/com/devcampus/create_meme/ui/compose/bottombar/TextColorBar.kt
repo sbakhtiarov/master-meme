@@ -22,8 +22,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.create_meme.ui.common.MemeColors
 import com.devcampus.create_meme.ui.model.DecorType
@@ -89,6 +93,22 @@ fun TextColorBar(
     LaunchedEffect(Unit) {
         rowState.animateScrollToItem(
             MemeColors.colors.indexOfFirst { it == textDecor.fontColor }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewTextColorBar() {
+    MasterMemeTheme {
+        TextColorBar(
+            decor = MemeDecor(
+                id = "",
+                topLeft = Offset(0f, 0f),
+                size = Size(0f, 0f),
+                type = DecorType.TextDecor("")
+            ),
+            onColorSelected = {}
         )
     }
 }

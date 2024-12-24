@@ -13,8 +13,12 @@ import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
@@ -53,6 +57,22 @@ fun TextSizeBar(
             modifier = Modifier.size(44.dp),
             painter = painterResource(R.drawable.ic_font),
             contentDescription = null
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewTextSizeBar() {
+    MasterMemeTheme {
+        TextSizeBar(
+            decor = MemeDecor(
+                id = "",
+                topLeft = Offset(0f, 0f),
+                size = Size(0f, 0f),
+                type = DecorType.TextDecor("")
+            ),
+            onFontScaleChanged = {},
         )
     }
 }

@@ -22,9 +22,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devcampus.common_android.ui.conditional
+import com.devcampus.common_android.ui.theme.DefaultMemeColorScheme
+import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.ui.common.MemeFontFamily
 import com.devcampus.create_meme.ui.common.MemeFonts
 import com.devcampus.create_meme.ui.model.DecorType
@@ -98,6 +103,22 @@ private fun FontButton(font: MemeFontFamily, isSelected: () -> Boolean, onClick:
         Text(
             text = font.name,
             fontSize = 14.sp
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewTextStyleBar() {
+    MasterMemeTheme {
+        TextStyleBar(
+            decor = MemeDecor(
+                id = "",
+                topLeft = Offset(0f, 0f),
+                size = Size(0f, 0f),
+                type = DecorType.TextDecor("")
+            ),
+            onFontSelected = {}
         )
     }
 }

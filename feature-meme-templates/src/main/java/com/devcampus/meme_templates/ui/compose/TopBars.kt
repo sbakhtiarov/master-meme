@@ -1,5 +1,6 @@
 package com.devcampus.meme_templates.ui.compose
 
+import android.view.Surface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,8 +29,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.common_android.ui.theme.TextOutline
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.meme_templates.R
@@ -123,5 +126,25 @@ internal fun SearchTopBar(
         )
 
         LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewDefaultTopBar() {
+    MasterMemeTheme {
+        DefaultTopBar {}
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewSearchTopBar() {
+    MasterMemeTheme {
+        SearchTopBar(
+            templatesCount = 10,
+            onQueryUpdate = {},
+            onDismissed = {},
+        )
     }
 }

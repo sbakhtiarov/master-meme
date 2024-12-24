@@ -37,13 +37,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.transformations
 import coil3.transform.RoundedCornersTransformation
+import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.memes_list.domain.model.Meme
+import com.devcampus.memes_list.R
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -210,22 +213,56 @@ private fun IconFavoriteFilled(modifier: Modifier = Modifier) {
     )
 }
 
-//@Composable
-//@Preview
-//private fun MemeGridItemPreview() {
-//    MasterMemeTheme {
-//        Box(modifier = Modifier.padding(22.dp)) {
-//            MemeGridItem(
-//                meme = Meme(
-//                    path = "android.resource://" +
-//                            "${LocalContext.current.packageName}/${R.drawable.memes_empty}",
-//                    isFavourite = false
-//                ),
-//                onClick = {},
-//                onLongClick = {},
-//                onFavouriteClick = {},
-//                isSelected = { false },
-//            )
-//        }
-//    }
-//}
+@Composable
+private fun getPreviewMeme(isFavourite: Boolean = false) = Meme(
+    path = "android.resource://${LocalContext.current.packageName}/${R.drawable.memes_empty}",
+    isFavourite = isFavourite
+)
+
+@Composable
+@Preview
+private fun PreviewMemeGridItem() {
+    MasterMemeTheme {
+        Box(modifier = Modifier.padding(22.dp)) {
+            MemeGridItem(
+                meme = getPreviewMeme(),
+                onClick = {},
+                onLongClick = {},
+                onFavouriteClick = {},
+                isSelected = { null },
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+private fun PreviewMemeGridItemFavourite() {
+    MasterMemeTheme {
+        Box(modifier = Modifier.padding(22.dp)) {
+            MemeGridItem(
+                meme = getPreviewMeme(true),
+                onClick = {},
+                onLongClick = {},
+                onFavouriteClick = {},
+                isSelected = { null },
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+private fun PreviewMemeGridItemSelected() {
+    MasterMemeTheme {
+        Box(modifier = Modifier.padding(22.dp)) {
+            MemeGridItem(
+                meme = getPreviewMeme(),
+                onClick = {},
+                onLongClick = {},
+                onFavouriteClick = {},
+                isSelected = { true },
+            )
+        }
+    }
+}
