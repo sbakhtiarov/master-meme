@@ -1,6 +1,7 @@
 package com.devcampus.create_meme.ui.compose
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -48,6 +49,7 @@ import com.devcampus.create_meme.ui.Intent.OnBackPress
 import com.devcampus.create_meme.ui.Share
 import com.devcampus.create_meme.ui.ShowLeaveConfirmation
 import com.devcampus.create_meme.ui.ShowMemeCreateError
+import com.devcampus.create_meme.ui.common.LockScreenOrientation
 import com.devcampus.create_meme.ui.compose.bottombar.DefaultBottomBar
 import com.devcampus.create_meme.ui.compose.bottombar.TextOptionsBottomBar
 import com.devcampus.create_meme.ui.compose.dialog.ExitConfirmationDialog
@@ -104,6 +106,8 @@ fun CreateMemeScreen(
     }
 
     BackHandler { sendIntent(OnBackPress) }
+
+    LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
     Scaffold(
         topBar = {
