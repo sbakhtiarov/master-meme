@@ -6,6 +6,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -36,7 +37,7 @@ internal fun MemeContentScreen(
     }
 
     LazyVerticalGrid(
-        modifier = Modifier.drawListGradient(),
+        modifier = Modifier.fillMaxSize().drawListGradient(),
         columns = GridCells.Fixed(columns),
         contentPadding = PaddingValues(start = 22.dp, top = 22.dp, end = 22.dp, bottom = 100.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

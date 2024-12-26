@@ -17,9 +17,11 @@ import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.toSize
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.common.MemeFontFamily
+import com.devcampus.create_meme.ui.model.AnimatedDecor
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
 import com.devcampus.create_meme.ui.model.textDecor
+import com.devcampus.create_meme.ui.model.toAnimatedDecor
 import java.util.UUID
 
 class MemeEditorState(
@@ -33,7 +35,7 @@ class MemeEditorState(
     val onDecorUpdated: (MemeDecor) -> Unit,
 ) {
 
-    var selectedItem by mutableStateOf<MemeDecor?>(null)
+    var selectedItem by mutableStateOf<AnimatedDecor?>(null)
 
     var isInTextEditMode by mutableStateOf<Boolean>(false)
 
@@ -61,7 +63,7 @@ class MemeEditorState(
             size = size.toSize(),
         )
 
-        selectedItem = decor
+        selectedItem = decor.toAnimatedDecor()
 
         onDecorAdded(decor)
     }
@@ -103,7 +105,7 @@ class MemeEditorState(
                 type = textDecor.copy(fontFamily = font),
                 topLeft = topLeft,
                 size = newSize,
-            )
+            ).toAnimatedDecor()
         }
     }
 
@@ -125,7 +127,7 @@ class MemeEditorState(
                 type = textDecor.copy(fontScale = scale),
                 topLeft = topLeft,
                 size = newSize,
-            )
+            ).toAnimatedDecor()
         }
     }
 
@@ -133,7 +135,7 @@ class MemeEditorState(
         withTextSelection { decor, textDecor ->
             selectedItem = decor.copy(
                 type = textDecor.copy(fontColor = color),
-            )
+            ).toAnimatedDecor()
         }
     }
 
@@ -158,7 +160,7 @@ class MemeEditorState(
                 type = textDecor.copy(text = newText),
                 topLeft = topLeft,
                 size = newSize,
-            )
+            ).toAnimatedDecor()
 
             return true
         }
@@ -198,14 +200,14 @@ class MemeEditorState(
     }
 
     private inline fun withTextSelection(block: (MemeDecor, DecorType.TextDecor) -> Unit) {
-        selectedItem?.let { decor ->
+        selectedItem?.decor?.let { decor ->
             decor.textDecor()?.let { textDecor->
                 block(decor, textDecor)
             }
         }
     }
 
-    private inline fun withSelection(block: (MemeDecor) -> Unit) { selectedItem?.let { block(it) } }
+    private inline fun withSelection(block: (MemeDecor) -> Unit) { selectedItem?.decor?.let { block(it) } }
 }
 
 @Composable

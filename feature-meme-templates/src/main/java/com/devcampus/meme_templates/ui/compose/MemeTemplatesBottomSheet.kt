@@ -36,7 +36,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.devcampus.common_android.ui.drawListGradient
-import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.meme_templates.ui.MemeTemplatesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,8 +53,6 @@ fun MemeTemplatesBottomSheet(
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-
-    val scrimColor = colorsScheme().surfaceContainerLowest
 
     ModalBottomSheet(
         modifier = Modifier

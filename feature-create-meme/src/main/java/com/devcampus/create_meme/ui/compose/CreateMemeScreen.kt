@@ -157,7 +157,7 @@ fun CreateMemeScreen(
                     BottomBarType.TEXT_OPTIONS ->
                         if (editorState.selectedItem != null) {
                             TextOptionsBottomBar(
-                                decor = editorState.selectedItem ?: error("No selection"),
+                                decor = editorState.selectedItem?.decor ?: error("No selection"),
                                 onFontSelected = { editorState.setFont(it) },
                                 onFontScaleSelected = { editorState.setFontScale(it) },
                                 onFontColorSelected = { editorState.setFontColor(it) },

@@ -90,7 +90,7 @@ fun MemeEditor(
         }
 
         if (state.isInTextEditMode) {
-            state.selectedItem?.let { decor ->
+            state.selectedItem?.decor?.let { decor ->
 
                 requireNotNull(decor.topLeft)
                 requireNotNull(decor.size)

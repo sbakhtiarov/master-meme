@@ -16,13 +16,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import com.devcampus.create_meme.ui.editor.EditorProperties
+import com.devcampus.create_meme.ui.model.AnimatedDecor
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
 
 @Composable
 fun Modifier.drawMemeDecor(
-    selectedItem: MemeDecor?,
-    dragItem: MemeDecor?,
+    selectedItem: AnimatedDecor?,
+    dragItem: AnimatedDecor?,
     decorItems: List<MemeDecor>,
     editorProperties: EditorProperties,
     isInTextEditMode: Boolean,
@@ -35,20 +36,22 @@ fun Modifier.drawMemeDecor(
         drawContent()
 
         // Draw dragged item if it is not selected
-        if (dragItem?.id != selectedItem?.id) {
-            dragItem?.let { decor -> drawDecor(
-                decor = decor,
-                properties = editorProperties,
-                drawDeleteButton = false,
-                drawBorder = false,
-                textMeasurer = textMeasurer
-            ) }
+        if (dragItem?.decor?.id != selectedItem?.decor?.id) {
+            dragItem?.let { decor ->
+                drawAnimatedDecor(
+                    animatedDecor = decor,
+                    properties = editorProperties,
+                    drawDeleteButton = false,
+                    drawBorder = false,
+                    textMeasurer = textMeasurer
+                )
+            }
         }
 
         // Draw selected item
         selectedItem?.let { decor ->
-            drawDecor(
-                decor = decor,
+            drawAnimatedDecor(
+                animatedDecor = decor,
                 properties = editorProperties,
                 drawDeleteButton = isInTextEditMode.not(),
                 textMeasurer = textMeasurer,
@@ -58,8 +61,8 @@ fun Modifier.drawMemeDecor(
 
         // Draw all other items
         decorItems
-            .filter { it.id != dragItem?.id }
-            .filter { it.id != selectedItem?.id }
+            .filter { it.id != dragItem?.decor?.id }
+            .filter { it.id != selectedItem?.decor?.id }
             .forEach { decor -> drawDecor(
                 decor = decor,
                 properties = editorProperties,
@@ -70,29 +73,48 @@ fun Modifier.drawMemeDecor(
     }
 }
 
-private fun DrawScope.drawDecor(
-    decor: MemeDecor,
+private fun DrawScope.drawAnimatedDecor(
+    animatedDecor: AnimatedDecor,
     properties: EditorProperties,
     drawDeleteButton: Boolean = true,
     drawBorder: Boolean,
     textMeasurer: TextMeasurer,
 ) {
 
+    val decor = if (animatedDecor.offset != null) {
+        animatedDecor.decor.copy(topLeft = animatedDecor.offset.value)
+    } else {
+        animatedDecor.decor
+    }
+
+    drawDecor(decor, properties, drawDeleteButton, drawBorder, textMeasurer, animatedDecor.alpha.value)
+}
+
+private fun DrawScope.drawDecor(
+    decor: MemeDecor,
+    properties: EditorProperties,
+    drawDeleteButton: Boolean = true,
+    drawBorder: Boolean,
+    textMeasurer: TextMeasurer,
+    alpha: Float = 1f
+) {
+
     if (drawBorder) {
 
-        drawDecorBorder(decor, properties)
+        drawDecorBorder(decor, properties, alpha)
 
         if (drawDeleteButton) {
-            drawDeleteButton(decor, properties)
+            drawDeleteButton(decor, properties, alpha)
         }
     }
 
-    drawDecorType(decor, textMeasurer)
+    drawDecorType(decor, textMeasurer, alpha)
 }
 
 private fun DrawScope.drawDecorBorder(
     decor: MemeDecor,
     properties: EditorProperties,
+    alpha: Float,
 ) {
     val borderRectSize = decor.size.copy(
         width = decor.size.width + 2 * properties.borderMargin,
@@ -100,7 +122,7 @@ private fun DrawScope.drawDecorBorder(
     )
 
     drawRoundRect(
-        color = properties.borderColor,
+        color = properties.borderColor.copy(alpha),
         topLeft = decor.topLeft.minus(Offset(properties.borderMargin, properties.borderMargin)),
         size = borderRectSize,
         cornerRadius = properties.borderCornerRadius,
@@ -108,7 +130,7 @@ private fun DrawScope.drawDecorBorder(
     )
 
     drawRoundRect(
-        color = Color.Black,
+        color = Color.Black.copy(alpha),
         topLeft = decor.topLeft.minus(Offset(properties.borderMargin, properties.borderMargin)),
         size = borderRectSize,
         cornerRadius = properties.borderCornerRadius,
@@ -125,13 +147,17 @@ private fun DrawScope.drawDecorBorder(
 private fun DrawScope.drawDeleteButton(
     decor: MemeDecor,
     properties: EditorProperties,
+    alpha: Float,
 ) {
     with(properties.deleteIconPainter) {
         translate(
             left = decor.topLeft.x + decor.size.width + properties.borderMargin - properties.deleteIconSize / 2f,
             top = decor.topLeft.y - properties.borderMargin - properties.deleteIconSize / 2f,
         ) {
-            draw(Size(properties.deleteIconSize, properties.deleteIconSize))
+            draw(
+                size = Size(properties.deleteIconSize, properties.deleteIconSize),
+                alpha = alpha
+            )
         }
     }
 }
@@ -139,6 +165,7 @@ private fun DrawScope.drawDeleteButton(
 private fun DrawScope.drawDecorType(
     decor: MemeDecor,
     textMeasurer: TextMeasurer,
+    alpha: Float,
 ) {
     when (decor.type) {
         is DecorType.TextDecor -> {
@@ -152,7 +179,7 @@ private fun DrawScope.drawDecorType(
 
             drawText(
                 textLayoutResult = layoutResult,
-                color = decor.type.fontColor,
+                color = decor.type.fontColor.copy(alpha = alpha),
                 topLeft = decor.topLeft,
                 drawStyle = Fill,
             )
@@ -160,7 +187,7 @@ private fun DrawScope.drawDecorType(
             if (decor.type.fontFamily.isStroke) {
                 drawText(
                     textLayoutResult = layoutResult,
-                    color = decor.type.strokeColor,
+                    color = decor.type.strokeColor.copy(alpha = alpha),
                     topLeft = decor.topLeft,
                     drawStyle = Stroke(width = 4f),
                 )
