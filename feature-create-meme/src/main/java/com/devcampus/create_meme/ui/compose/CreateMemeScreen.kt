@@ -55,7 +55,8 @@ import com.devcampus.create_meme.ui.compose.bottombar.TextOptionsBottomBar
 import com.devcampus.create_meme.ui.compose.dialog.ExitConfirmationDialog
 import com.devcampus.create_meme.ui.compose.dialog.SaveAndShareDialog
 import com.devcampus.create_meme.ui.compose.editor.MemeEditor
-import com.devcampus.create_meme.ui.compose.editor.rememberMemeEditorState
+import com.devcampus.create_meme.ui.editor.rememberEditorProperties
+import com.devcampus.create_meme.ui.editor.rememberMemeEditorState
 import kotlinx.coroutines.flow.collectLatest
 import com.devcampus.common_android.R as CommonR
 
@@ -78,9 +79,11 @@ fun CreateMemeScreen(
 
     val density = LocalDensity.current
 
+    val properties = rememberEditorProperties()
+
     val editorState = rememberMemeEditorState(
-        memeTemplatePath = templateAsset,
         decorItems = viewModel.decorItems,
+        properties = properties,
         onDeleteClick = { id ->
             sendIntent(Intent.OnDecorDeleted(id))
         },
@@ -175,6 +178,7 @@ fun CreateMemeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
+            templatePath = templateAsset,
             state = editorState,
             savedMemePath = viewModel.savedMemePath.value,
             sharedTransitionScope = sharedTransitionScope,

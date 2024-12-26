@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
                                 showMemePreview = { path ->
                                     navController.navigate(MemePreviewScreenDestination(path))
                                 },
-                                onAddClick = {
+                                showMemeTemplates = {
                                     navController.navigate(MemeTemplatesDestination)
                                 }
                             )

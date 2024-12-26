@@ -29,17 +29,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.devcampus.common_android.ui.drawListGradient
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.meme_templates.ui.MemeTemplatesViewModel
 
@@ -66,19 +62,7 @@ fun MemeTemplatesBottomSheet(
             .fillMaxHeight()
             .statusBarsPadding()
             .windowInsetsPadding(WindowInsets(0.dp))
-            .drawWithCache {
-
-                val selectionGradient = Brush.linearGradient(
-                    colors = listOf(scrimColor, Color.Transparent),
-                    start = Offset(0f, size.height),
-                    end = Offset(0f, size.height - size.height / 6f)
-                )
-
-                onDrawWithContent {
-                    drawContent()
-                    drawRect(selectionGradient, blendMode = BlendMode.Multiply)
-                }
-            },
+            .drawListGradient(),
         sheetState = sheetState,
         onDismissRequest = {
             onDismissed()

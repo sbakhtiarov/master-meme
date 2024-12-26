@@ -21,8 +21,7 @@ internal class FavouriteMemesRepositoryImpl @Inject constructor(
 
     override fun getFavouriteMemes(): Flow<List<String>> {
         return dataStore.data.map { prefs ->
-            val json = prefs[favouritesKey]
-            json?.let {
+            prefs[favouritesKey]?.let {
                 Json.decodeFromString<List<String>>(it)
             } ?: emptyList()
         }

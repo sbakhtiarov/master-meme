@@ -11,79 +11,107 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import com.devcampus.create_meme.ui.editor.EditorProperties
 import com.devcampus.create_meme.ui.model.DecorType
 import com.devcampus.create_meme.ui.model.MemeDecor
 
 @Composable
 fun Modifier.drawMemeDecor(
-    state: MemeEditorState
+    selectedItem: MemeDecor?,
+    dragItem: MemeDecor?,
+    decorItems: List<MemeDecor>,
+    editorProperties: EditorProperties,
+    isInTextEditMode: Boolean,
 ): Modifier {
+
+    val textMeasurer = rememberTextMeasurer()
 
     return this then Modifier.drawWithContent {
 
         drawContent()
 
-        if (state.dragItem?.id != state.selectedItem?.id) {
-            state.dragItem?.let { decor -> drawDecor(decor, state) }
+        // Draw dragged item if it is not selected
+        if (dragItem?.id != selectedItem?.id) {
+            dragItem?.let { decor -> drawDecor(
+                decor = decor,
+                properties = editorProperties,
+                drawDeleteButton = false,
+                drawBorder = false,
+                textMeasurer = textMeasurer
+            ) }
         }
 
-        state.selectedItem?.let { decor ->
+        // Draw selected item
+        selectedItem?.let { decor ->
             drawDecor(
                 decor = decor,
-                state = state,
-                drawDeleteButton = state.isInTextEditMode.not()
+                properties = editorProperties,
+                drawDeleteButton = isInTextEditMode.not(),
+                textMeasurer = textMeasurer,
+                drawBorder = true,
             )
         }
 
-        state.decorItems
-            .filter { it.id != state.dragItem?.id }
-            .filter { it.id != state.selectedItem?.id }
-            .forEach { decor -> drawDecor(decor, state) }
+        // Draw all other items
+        decorItems
+            .filter { it.id != dragItem?.id }
+            .filter { it.id != selectedItem?.id }
+            .forEach { decor -> drawDecor(
+                decor = decor,
+                properties = editorProperties,
+                textMeasurer = textMeasurer,
+                drawDeleteButton = false,
+                drawBorder = false,
+            ) }
     }
 }
 
 private fun DrawScope.drawDecor(
     decor: MemeDecor,
-    state: MemeEditorState,
+    properties: EditorProperties,
     drawDeleteButton: Boolean = true,
+    drawBorder: Boolean,
+    textMeasurer: TextMeasurer,
 ) {
 
-    if (decor.id == state.selectedItem?.id) {
+    if (drawBorder) {
 
-        drawDecorBorder(decor, state)
+        drawDecorBorder(decor, properties)
 
         if (drawDeleteButton) {
-            drawDeleteButton(decor, state)
+            drawDeleteButton(decor, properties)
         }
     }
 
-    drawDecorType(decor, state)
+    drawDecorType(decor, textMeasurer)
 }
 
 private fun DrawScope.drawDecorBorder(
     decor: MemeDecor,
-    state: MemeEditorState,
+    properties: EditorProperties,
 ) {
     val borderRectSize = decor.size.copy(
-        width = decor.size.width + 2 * state.borderMargin,
-        height = decor.size.height + 2 * state.borderMargin
+        width = decor.size.width + 2 * properties.borderMargin,
+        height = decor.size.height + 2 * properties.borderMargin
     )
 
     drawRoundRect(
-        color = state.borderColor,
-        topLeft = decor.topLeft.minus(Offset(state.borderMargin, state.borderMargin)),
+        color = properties.borderColor,
+        topLeft = decor.topLeft.minus(Offset(properties.borderMargin, properties.borderMargin)),
         size = borderRectSize,
-        cornerRadius = state.borderCornerRadius,
+        cornerRadius = properties.borderCornerRadius,
         style = Stroke(width = 2f)
     )
 
     drawRoundRect(
         color = Color.Black,
-        topLeft = decor.topLeft.minus(Offset(state.borderMargin, state.borderMargin)),
+        topLeft = decor.topLeft.minus(Offset(properties.borderMargin, properties.borderMargin)),
         size = borderRectSize,
-        cornerRadius = state.borderCornerRadius,
+        cornerRadius = properties.borderCornerRadius,
         style = Stroke(
             width = 2f,
             pathEffect = PathEffect.dashPathEffect(
@@ -96,21 +124,21 @@ private fun DrawScope.drawDecorBorder(
 
 private fun DrawScope.drawDeleteButton(
     decor: MemeDecor,
-    state: MemeEditorState,
+    properties: EditorProperties,
 ) {
-    with(state.deleteIconPainter) {
+    with(properties.deleteIconPainter) {
         translate(
-            left = decor.topLeft.x + decor.size.width + state.borderMargin - state.deleteIconSize / 2f,
-            top = decor.topLeft.y - state.borderMargin - state.deleteIconSize / 2f,
+            left = decor.topLeft.x + decor.size.width + properties.borderMargin - properties.deleteIconSize / 2f,
+            top = decor.topLeft.y - properties.borderMargin - properties.deleteIconSize / 2f,
         ) {
-            draw(Size(state.deleteIconSize, state.deleteIconSize))
+            draw(Size(properties.deleteIconSize, properties.deleteIconSize))
         }
     }
 }
 
 private fun DrawScope.drawDecorType(
     decor: MemeDecor,
-    state: MemeEditorState,
+    textMeasurer: TextMeasurer,
 ) {
     when (decor.type) {
         is DecorType.TextDecor -> {
@@ -120,7 +148,7 @@ private fun DrawScope.drawDecorType(
                 fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale
             )
 
-            val layoutResult = state.textMeasurer.measure(decor.type.text, style)
+            val layoutResult = textMeasurer.measure(decor.type.text, style)
 
             drawText(
                 textLayoutResult = layoutResult,

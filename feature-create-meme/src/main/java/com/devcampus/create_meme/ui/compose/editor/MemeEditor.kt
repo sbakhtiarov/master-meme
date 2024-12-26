@@ -3,8 +3,6 @@ package com.devcampus.create_meme.ui.compose.editor
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -24,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -39,11 +36,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import coil3.compose.AsyncImage
+import com.devcampus.create_meme.ui.editor.MemeEditorState
+import com.devcampus.create_meme.ui.editor.handleDragEvents
+import com.devcampus.create_meme.ui.editor.handleTapEvents
+import com.devcampus.create_meme.ui.editor.rememberTouchAndDragHandler
 import com.devcampus.create_meme.ui.model.DecorType
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MemeEditor(
+    templatePath: String,
     state: MemeEditorState,
     savedMemePath: String,
     modifier: Modifier = Modifier,
@@ -52,6 +54,8 @@ fun MemeEditor(
 ) {
 
     var imagePosition by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+    val touchAndDragHandler = rememberTouchAndDragHandler(state)
 
     Box(
         modifier = modifier,
@@ -71,34 +75,16 @@ fun MemeEditor(
                     .onPlaced { position ->
                         imagePosition = position
                     }
-                    .drawMemeDecor(state)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { position ->
-                                state.onTap(position)
-                            },
-                            onDoubleTap = { position ->
-                                state.onDoubleTap(position)
-                            }
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                state.onDragStart(offset)
-                            },
-                            onDragEnd = {
-                                state.onDragEnd()
-                            },
-                            onDrag = { pointerInputChange, offset ->
-                                state.onDrag(offset)
-                            },
-                            onDragCancel = {
-                                state.onDragCancel()
-                            }
-                        )
-                    },
-                model = state.memeTemplatePath,
+                    .drawMemeDecor(
+                        selectedItem = state.selectedItem,
+                        dragItem = touchAndDragHandler.dragItem,
+                        decorItems = state.decorItems,
+                        editorProperties = state.properties,
+                        isInTextEditMode = state.isInTextEditMode,
+                    )
+                    .handleTapEvents(touchAndDragHandler)
+                    .handleDragEvents(touchAndDragHandler),
+                model = templatePath,
                 contentDescription = null,
             )
         }

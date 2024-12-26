@@ -87,14 +87,15 @@ internal class MemeListViewModel @Inject constructor(
     }
 
     private fun handleShareSelection() {
-        (_state.value as? DataState)?.selection?.let { selection ->
-            if (selection.isEmpty()) return
-            sendAction(Share(paths = selection.map { it.path }))
+        withSelection { selection ->
+            if (selection.isNotEmpty()) {
+                sendAction(Share(paths = selection.map { it.path }))
+            }
         }
     }
 
     private fun handleDeleteConfirmation() {
-        (_state.value as? DataState)?.selection?.let { selection ->
+        withSelection { selection ->
             viewModelScope.launch {
                 memesRepository.delete(selection.map { MemeFile(it.path) })
                     .onSuccess {
@@ -116,7 +117,7 @@ internal class MemeListViewModel @Inject constructor(
 
     private fun handleMemeClick(meme: Meme) {
         if (isInSelectionMode()) {
-            (_state.value as? DataState)?.selection?.let { selection ->
+            withSelection { selection ->
                 updateState<DataState> {
                     val newSelection = if (selection.contains(meme)) {
                         (selection - meme).ifEmpty { null }
@@ -133,9 +134,7 @@ internal class MemeListViewModel @Inject constructor(
     }
 
     private fun handleMemeLongClick(meme: Meme) {
-        val viewState = _state.value as? DataState
-
-        if (viewState?.selection == null) {
+        if (!isInSelectionMode()) {
             updateState<DataState> {
                 copy(selection = listOf(meme))
             }
@@ -165,6 +164,10 @@ internal class MemeListViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    private fun withSelection(block: (List<Meme>) -> Unit) {
+        (_state.value as? DataState)?.selection?.let { block(it) }
+    }
+
     private inline fun <reified S : ViewState> updateState(block: S.() -> S) {
         val currentState = _state.value
         if (currentState is S) {
@@ -181,12 +184,12 @@ internal class MemeListViewModel @Inject constructor(
     private fun isInSelectionMode() = _state.value.isInSelectionMode()
 }
 
+@Immutable
 internal sealed interface ViewState
 data object Loading : ViewState
 data object Error : ViewState
 data object EmptyState : ViewState
 
-@Immutable
 internal data class DataState(
     val memes: List<Meme> = emptyList(),
     val selection: List<Meme>? = null,

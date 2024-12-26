@@ -60,7 +60,7 @@ fun MemesScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     showMemePreview: (String) -> Unit,
-    onAddClick: () -> Unit,
+    showMemeTemplates: () -> Unit,
 ) {
 
     val viewModel: MemeListViewModel = hiltViewModel()
@@ -117,7 +117,7 @@ fun MemesScreen(
                             shape = RoundedCornerShape(14.dp)
                         ),
                     onClick = {
-                        onAddClick()
+                        showMemeTemplates()
                     },
                 ) {
                     Icon(

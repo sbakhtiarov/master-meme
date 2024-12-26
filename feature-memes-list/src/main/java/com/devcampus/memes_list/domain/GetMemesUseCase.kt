@@ -17,23 +17,21 @@ internal class GetMemesUseCase @Inject constructor(
             memesRepository.getMemes(),
             favouritesRepository.getFavouriteMemes(),
             sortModeRepository.getSortMode()
-        ) {
-            memeFiles, favourites, sortMode ->
+        ) { memeFiles, favourites, sortMode ->
 
-                val memes = memeFiles
-                    .sortedByDescending { it.lastModified }
-                    .map { file ->
-                        Meme(
-                            path = file.path,
-                            isFavourite = favourites.contains(file.path)
-                        )
-                    }
-
-                if (sortMode == SortMode.NEWEST_FIRST) {
-                    memes
-                } else {
-                    memes.sortedByDescending { it.isFavourite }
+            val memes = memeFiles
+                .sortedByDescending { it.lastModified }
+                .map { file ->
+                    Meme(
+                        path = file.path,
+                        isFavourite = favourites.contains(file.path)
+                    )
                 }
 
+            if (sortMode == SortMode.NEWEST_FIRST) {
+                memes
+            } else {
+                memes.sortedByDescending { it.isFavourite }
+            }
         }
 }
