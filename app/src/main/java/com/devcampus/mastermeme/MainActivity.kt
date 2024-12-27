@@ -2,17 +2,14 @@ package com.devcampus.mastermeme
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.devcampus.common_android.ui.theme.DefaultMemeColorScheme
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.ui.CreateMemeDestination
 import com.devcampus.create_meme.ui.compose.CreateMemeScreen
@@ -28,11 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge(
-            navigationBarStyle = SystemBarStyle.dark(
-                scrim = DefaultMemeColorScheme.surface.toArgb()
-            )
-        )
+        enableEdgeToEdge()
 
         setContent {
 

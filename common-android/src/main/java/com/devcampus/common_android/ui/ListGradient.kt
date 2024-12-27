@@ -13,7 +13,7 @@ import com.devcampus.common_android.ui.theme.colorsScheme
 @Composable
 fun Modifier.drawListGradient() = composed {
 
-    val scrimColor = colorsScheme().surfaceContainerLowest
+    val scrimColor = colorsScheme().surface
 
     drawWithCache {
         val selectionGradient = Brush.linearGradient(

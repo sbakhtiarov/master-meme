@@ -12,8 +12,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -110,6 +113,7 @@ fun MemesScreen(
             },
             floatingActionButton = {
                 AnimatedVisibility(
+                    modifier = Modifier.navigationBarsPadding(),
                     visible = viewState.isInSelectionMode().not(),
                     enter = fadeIn(),
                     exit = fadeOut(),
@@ -136,7 +140,8 @@ fun MemesScreen(
                         )
                     }
                 }
-            }
+            },
+            contentWindowInsets = WindowInsets.statusBars
         ) { innerPadding ->
             Box(
                 modifier = Modifier.padding(innerPadding)

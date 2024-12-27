@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.devcampus.common_android.ui.drawListGradient
 import com.devcampus.memes_list.domain.model.Meme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -36,7 +37,7 @@ internal fun MemeContentScreen(
     }
 
     LazyVerticalGrid(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().drawListGradient(),
         columns = GridCells.Fixed(columns),
         contentPadding = PaddingValues(start = 22.dp, top = 22.dp, end = 22.dp, bottom = 100.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
