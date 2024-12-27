@@ -4,44 +4,23 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.devcampus.common_android.ui.BottomSheetScaffoldWithScrim
 import com.devcampus.common_android.ui.MemeShare.showShareDialog
-import com.devcampus.common_android.ui.theme.colorsScheme
-import com.devcampus.create_meme.R
+import com.devcampus.common_android.ui.rememberSheetState
 import com.devcampus.create_meme.ui.CloseScreen
 import com.devcampus.create_meme.ui.CreateMemeViewModel
 import com.devcampus.create_meme.ui.Intent
@@ -50,14 +29,12 @@ import com.devcampus.create_meme.ui.Share
 import com.devcampus.create_meme.ui.ShowLeaveConfirmation
 import com.devcampus.create_meme.ui.ShowMemeCreateError
 import com.devcampus.create_meme.ui.common.LockScreenOrientation
-import com.devcampus.create_meme.ui.compose.bottombar.DefaultBottomBar
-import com.devcampus.create_meme.ui.compose.bottombar.TextOptionsBottomBar
 import com.devcampus.create_meme.ui.compose.dialog.ExitConfirmationDialog
 import com.devcampus.create_meme.ui.compose.dialog.SaveAndShareDialog
-import com.devcampus.create_meme.ui.compose.editor.MemeEditor
 import com.devcampus.create_meme.ui.editor.rememberEditorProperties
 import com.devcampus.create_meme.ui.editor.rememberMemeEditorState
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import com.devcampus.common_android.R as CommonR
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -75,7 +52,6 @@ fun CreateMemeScreen(
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
 
     var showLeaveConfirmation by remember { mutableStateOf(false) }
-    var showSaveConfirmation by remember { mutableStateOf(false) }
 
     val density = LocalDensity.current
 
@@ -98,93 +74,57 @@ fun CreateMemeScreen(
         },
     )
 
-    val bottomBarType by remember {
-        derivedStateOf {
-            if (editorState.selectedItem == null) {
-                BottomBarType.DEFAULT
-            } else {
-                BottomBarType.TEXT_OPTIONS
-            }
-        }
-    }
-
     BackHandler { sendIntent(OnBackPress) }
 
     LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.new_meme))
-                },
-                navigationIcon = {
-                    Icon(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .padding(8.dp)
-                            .clickable { sendIntent(OnBackPress) },
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null
+    val scope = rememberCoroutineScope()
+    val bottomSheetState = rememberSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    BottomSheetScaffoldWithScrim(
+        bottomSheetState = bottomSheetState,
+        sheetContent = {
+            SaveAndShareDialog(
+                onSaveSelected = {
+                    scope.launch { bottomSheetState.hide() }
+                    sendIntent(
+                        Intent.OnSaveMeme(
+                            assetPath = templateAsset,
+                            canvasSize = editorState.canvasSize,
+                            density = density,
+                        )
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors().copy(
-                    containerColor = colorsScheme().surfaceContainerLow
-                ),
+                onShareSelected = {
+                    scope.launch { bottomSheetState.hide() }
+                    sendIntent(
+                        Intent.OnShareMeme(
+                            assetPath = templateAsset,
+                            canvasSize = editorState.canvasSize,
+                            density = density,
+                        )
+                    )
+                },
             )
         },
-        bottomBar = {
-            AnimatedContent(
-                targetState = bottomBarType,
-                label = "bottom bar",
-                transitionSpec = {
-                    val enter = fadeIn()
-                    val exit = fadeOut()
-                    enter.togetherWith(exit)
-                }
-
-            ) { bottomBarType ->
-                when(bottomBarType) {
-                    BottomBarType.DEFAULT ->
-                        DefaultBottomBar(
-                            isUndoAvailable = viewModel.undoActions.isNotEmpty(),
-                            isRedoAvailable = viewModel.redoActions.isNotEmpty(),
-                            onAddClick = { editorState.addTextDecor() },
-                            onSaveClick = { showSaveConfirmation = true },
-                            onUndoClick = { sendIntent(Intent.Undo) },
-                            onRedoClick = { sendIntent(Intent.Redo) },
-                        )
-                    BottomBarType.TEXT_OPTIONS ->
-                        if (editorState.selectedItem != null) {
-                            TextOptionsBottomBar(
-                                decor = editorState.selectedItem?.decor ?: error("No selection"),
-                                onFontSelected = { editorState.setFont(it) },
-                                onFontScaleSelected = { editorState.setFontScale(it) },
-                                onFontColorSelected = { editorState.setFontColor(it) },
-                                onCancel = { editorState.cancelChanges() },
-                                onConfirm = { editorState.confirmChanges() }
-                            )
-                        } else {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp))
-                        }
-                }
-            }
+        content = {
+            CreateMemeScreenContent(
+                memeTemplatePath = templateAsset,
+                memeFilePath = viewModel.memePath.value ?: templateAsset,
+                editorState = editorState,
+                isUndoAvailable = viewModel.undoActions.isNotEmpty(),
+                isRedoAvailable = viewModel.redoActions.isNotEmpty(),
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
+                onBackClick = { sendIntent(OnBackPress) },
+                onSaveClick = { scope.launch { bottomSheetState.expand() } },
+                onUndoClick = { sendIntent(Intent.Undo) },
+                onRedoClick = { sendIntent(Intent.Redo) }
+            )
         }
-    ) { innerPadding ->
-        MemeEditor(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            templatePath = templateAsset,
-            state = editorState,
-            memePath = viewModel.memePath.value ?: templateAsset,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope,
-        )
-    }
+    )
 
     if (showLeaveConfirmation) {
         ExitConfirmationDialog(
@@ -195,32 +135,6 @@ fun CreateMemeScreen(
             onCancel = {
                 showLeaveConfirmation = false
             }
-        )
-    }
-
-    if (showSaveConfirmation) {
-        SaveAndShareDialog(
-            onDismissed = { showSaveConfirmation = false },
-            onSaveSelected = {
-                showSaveConfirmation = false
-                sendIntent(
-                    Intent.OnSaveMeme(
-                        assetPath = templateAsset,
-                        canvasSize = editorState.canvasSize,
-                        density = density,
-                    )
-                )
-            },
-            onShareSelected = {
-                showSaveConfirmation = false
-                sendIntent(
-                    Intent.OnShareMeme(
-                        assetPath = templateAsset,
-                        canvasSize = editorState.canvasSize,
-                        density = density,
-                    )
-                )
-            },
         )
     }
 
@@ -238,8 +152,4 @@ fun CreateMemeScreen(
 
 private fun showError(context: Context) {
     Toast.makeText(context, CommonR.string.common_error, Toast.LENGTH_SHORT).show()
-}
-
-private enum class BottomBarType {
-    DEFAULT, TEXT_OPTIONS
 }

@@ -4,14 +4,9 @@ import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,10 +20,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,14 +30,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.devcampus.common_android.ui.BottomSheetScaffoldWithScrim
 import com.devcampus.common_android.ui.drawListGradient
 import com.devcampus.meme_templates.ui.MemeTemplatesViewModel
 import kotlinx.coroutines.Job
@@ -62,12 +54,11 @@ fun MemeTemplatesBottomSheetScaffold(
 ) {
 
     val scope = rememberCoroutineScope()
-    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState)
 
     BackHandler(enabled = bottomSheetState.isVisible) { scope.launch { bottomSheetState.hide() } }
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
+    BottomSheetScaffoldWithScrim(
+        bottomSheetState = bottomSheetState,
         sheetPeekHeight = 480.dp,
         sheetContent = {
             MemeTemplatesContent(
@@ -82,31 +73,7 @@ fun MemeTemplatesBottomSheetScaffold(
                 }
             )
         },
-        content = {
-            Box {
-
-                content()
-
-                AnimatedVisibility(
-                    bottomSheetState.isVisible || bottomSheetState.currentValue != bottomSheetState.targetValue,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(color = Color.Black.copy(alpha = 0.7f))
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onTap = {
-                                        scope.launch { bottomSheetState.hide() }
-                                    }
-                                )
-                            }
-                    )
-                }
-            }
-        }
+        content = content
     )
 }
 

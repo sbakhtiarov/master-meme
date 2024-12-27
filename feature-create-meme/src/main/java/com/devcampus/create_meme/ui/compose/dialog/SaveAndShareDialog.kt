@@ -5,15 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,36 +29,24 @@ import com.devcampus.create_meme.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaveAndShareDialog(
-    onDismissed: () -> Unit,
     onSaveSelected: () -> Unit,
     onShareSelected: () -> Unit,
 ) {
-
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
-    )
-
-    ModalBottomSheet(
-        modifier = Modifier,
-        sheetState = sheetState,
-        onDismissRequest = {
-            onDismissed()
-        }
+    Column(
+        modifier = Modifier.navigationBarsPadding()
     ) {
-        Column {
-            DialogButton(
-                icon = MemeIcons.SimCardDownload,
-                title = stringResource(R.string.save_to_device),
-                subtitle = stringResource(R.string.save_to_device_message),
-                onClick = onSaveSelected
-            )
-            DialogButton(
-                icon = Icons.Default.Share,
-                title = stringResource(R.string.share_the_meme),
-                subtitle = stringResource(R.string.share_the_meme_message),
-                onClick = onShareSelected
-            )
-        }
+        DialogButton(
+            icon = MemeIcons.SimCardDownload,
+            title = stringResource(R.string.save_to_device),
+            subtitle = stringResource(R.string.save_to_device_message),
+            onClick = onSaveSelected
+        )
+        DialogButton(
+            icon = Icons.Default.Share,
+            title = stringResource(R.string.share_the_meme),
+            subtitle = stringResource(R.string.share_the_meme_message),
+            onClick = onShareSelected
+        )
     }
 }
 
