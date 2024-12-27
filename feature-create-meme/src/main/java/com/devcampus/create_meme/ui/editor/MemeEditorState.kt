@@ -72,7 +72,7 @@ class MemeEditorState(
         selectedItem = null
     }
 
-    fun confirmChanges() {
+    fun confirmChanges(clearSelection: Boolean = true) {
         withSelection { selectedItem ->
 
             decorItems.find { it.id == selectedItem.id }?.let { currentItem ->
@@ -81,8 +81,10 @@ class MemeEditorState(
                 }
             }
 
-            this@MemeEditorState.selectedItem = null
-            isInTextEditMode = false
+            if (clearSelection) {
+                this@MemeEditorState.selectedItem = null
+                isInTextEditMode = false
+            }
         }
     }
 
@@ -178,7 +180,7 @@ class MemeEditorState(
                 return
             }
 
-            confirmChanges()
+            confirmChanges(clearSelection = false)
             isInTextEditMode = false
         }
     }
