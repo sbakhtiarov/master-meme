@@ -11,15 +11,20 @@ import androidx.compose.ui.graphics.Color
 import com.devcampus.common_android.ui.theme.colorsScheme
 
 @Composable
-fun Modifier.drawListGradient() = composed {
+fun Modifier.drawListGradient(
+    height: Float? = null
+) = composed {
 
     val scrimColor = colorsScheme().surface
 
     drawWithCache {
+
+        val y = height ?: size.height
+
         val selectionGradient = Brush.linearGradient(
             colors = listOf(scrimColor, Color.Transparent),
-            start = Offset(0f, size.height),
-            end = Offset(0f, size.height - size.height / 6f)
+            start = Offset(0f, y),
+            end = Offset(0f, y - size.height / 6f)
         )
 
         onDrawWithContent {
