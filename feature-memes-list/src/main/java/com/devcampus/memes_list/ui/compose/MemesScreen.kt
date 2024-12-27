@@ -12,25 +12,24 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -40,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.devcampus.common_android.ui.MemeShare.showShareDialog
 import com.devcampus.common_android.ui.theme.colorsScheme
+import com.devcampus.meme_templates.ui.compose.MemeTemplatesBottomSheetScaffold
 import com.devcampus.memes_list.ui.DataState
 import com.devcampus.memes_list.ui.EmptyState
 import com.devcampus.memes_list.ui.Error
@@ -52,15 +52,16 @@ import com.devcampus.memes_list.ui.ShowErrorMessage
 import com.devcampus.memes_list.ui.ShowMeme
 import com.devcampus.memes_list.ui.isInSelectionMode
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import com.devcampus.common_android.R as CommonR
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MemesScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     showMemePreview: (String) -> Unit,
-    showMemeTemplates: () -> Unit,
+    showMemeEditor: (String) -> Unit,
 ) {
 
     val viewModel: MemeListViewModel = hiltViewModel()
@@ -71,82 +72,89 @@ fun MemesScreen(
 
     val context = LocalContext.current
 
+    val scope = rememberCoroutineScope()
+    val bottomSheetState = rememberStandardBottomSheetState(initialValue = SheetValue.Hidden, skipHiddenState = false)
+
     BackHandler(enabled = (viewState as? DataState)?.selection != null) { sendIntent(Intent.OnBackPress) }
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            AnimatedContent(
-                targetState = viewState.isInSelectionMode(),
-                label = "AppBarAnimation"
-            ) { isSelectionMode ->
-                if (isSelectionMode) {
-                    SelectionAppBar(
-                        selectionCount = (viewState as? DataState)?.selection?.size ?: 0,
-                        onClose = { sendIntent(Intent.OnBackPress) },
-                        onShare = { sendIntent(Intent.OnSelectionShare) },
-                        onDelete = { sendIntent(Intent.OnSelectionDelete) },
-                    )
-                } else {
-                    DefaultAppBar(
-                        sortModeSelection = sortMode.ordinal,
-                        onSortModeSelected = { sendIntent(Intent.OnSortModeSelected(it)) }
-                    )
-                }
-            }
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = viewState.isInSelectionMode().not(),
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                IconButton(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .padding(
-                            WindowInsets.navigationBars
-                                .only(WindowInsetsSides.Horizontal)
-                                .asPaddingValues()
-                        )
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(colorsScheme().fabGradientStart, colorsScheme().fabGradientEnd)
-                            ),
-                            shape = RoundedCornerShape(14.dp)
-                        ),
-                    onClick = {
-                        showMemeTemplates()
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
+    MemeTemplatesBottomSheetScaffold(
+        bottomSheetState = bottomSheetState,
+        onTemplateSelected = {
+            showMemeEditor(it)
         }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            when (val state = viewState) {
-                is DataState ->
-                    MemeContentScreen(
-                        memes = state.memes,
-                        selection = state.selection,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedContentScope = animatedContentScope,
-                        onItemClick = { sendIntent(Intent.OnMemeClick(it)) },
-                        onItemLongClick = { sendIntent(Intent.OnMemeLongClick(it)) },
-                        onItemFavouriteClick = { sendIntent(Intent.OnMemeFavouriteClick(it)) },
-                    )
+    ) {
+        Scaffold(
+            topBar = {
+                AnimatedContent(
+                    targetState = viewState.isInSelectionMode(),
+                    label = "AppBarAnimation"
+                ) { isSelectionMode ->
+                    if (isSelectionMode) {
+                        SelectionAppBar(
+                            selectionCount = (viewState as? DataState)?.selection?.size ?: 0,
+                            onClose = { sendIntent(Intent.OnBackPress) },
+                            onShare = { sendIntent(Intent.OnSelectionShare) },
+                            onDelete = { sendIntent(Intent.OnSelectionDelete) },
+                        )
+                    } else {
+                        DefaultAppBar(
+                            sortModeSelection = sortMode.ordinal,
+                            onSortModeSelected = { sendIntent(Intent.OnSortModeSelected(it)) }
+                        )
+                    }
+                }
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = viewState.isInSelectionMode().not(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    IconButton(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(colorsScheme().fabGradientStart, colorsScheme().fabGradientEnd)
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            ),
+                        onClick = {
+                            scope.launch {
+                                bottomSheetState.partialExpand()
+                            }
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                when (val state = viewState) {
+                    is DataState ->
+                        MemeContentScreen(
+                            memes = state.memes,
+                            selection = state.selection,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedContentScope = animatedContentScope,
+                            onItemClick = { sendIntent(Intent.OnMemeClick(it)) },
+                            onItemLongClick = { sendIntent(Intent.OnMemeLongClick(it)) },
+                            onItemFavouriteClick = { sendIntent(Intent.OnMemeFavouriteClick(it)) },
+                        )
 
-                EmptyState -> EmptyScreen()
-                Loading -> LoadingScreen()
-                Error -> ErrorScreen()
+                    EmptyState -> EmptyScreen()
+                    Loading -> LoadingScreen()
+                    Error -> ErrorScreen()
+                }
             }
         }
     }

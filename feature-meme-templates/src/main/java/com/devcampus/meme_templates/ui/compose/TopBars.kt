@@ -1,6 +1,5 @@
 package com.devcampus.meme_templates.ui.compose
 
-import android.view.Surface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

@@ -10,15 +10,12 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.devcampus.common_android.ui.theme.DefaultMemeColorScheme
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.ui.CreateMemeDestination
 import com.devcampus.create_meme.ui.compose.CreateMemeScreen
-import com.devcampus.meme_templates.ui.MemeTemplatesDestination
-import com.devcampus.meme_templates.ui.compose.MemeTemplatesBottomSheet
 import com.devcampus.memes_list.ui.MemePreviewScreenDestination
 import com.devcampus.memes_list.ui.MemeScreenDestination
 import com.devcampus.memes_list.ui.compose.MemePreviewScreen
@@ -55,18 +52,9 @@ class MainActivity : ComponentActivity() {
                                 showMemePreview = { path ->
                                     navController.navigate(MemePreviewScreenDestination(path))
                                 },
-                                showMemeTemplates = {
-                                    navController.navigate(MemeTemplatesDestination)
-                                }
-                            )
-                        }
-
-                        dialog<MemeTemplatesDestination> {
-                            MemeTemplatesBottomSheet(
-                                onSelected = { template ->
+                                showMemeEditor = { template ->
                                     navController.navigate(CreateMemeDestination(template))
                                 },
-                                onDismissed = { navController.navigateUp() },
                             )
                         }
 
