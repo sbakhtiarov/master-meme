@@ -5,6 +5,7 @@ import android.os.FileObserver
 import java.io.File
 
 
+@Suppress("DEPRECATION")
 internal fun File.startWatching(onUpdate: () -> Unit) =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         object : FileObserver(this, CREATE or DELETE) {
