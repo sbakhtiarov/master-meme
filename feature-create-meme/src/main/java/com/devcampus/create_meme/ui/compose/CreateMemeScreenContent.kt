@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.compose.bottombar.DefaultBottomBar
+import com.devcampus.create_meme.ui.compose.bottombar.SaveProgressBottomBar
 import com.devcampus.create_meme.ui.compose.bottombar.TextOptionsBottomBar
 import com.devcampus.create_meme.ui.compose.editor.MemeEditor
 import com.devcampus.create_meme.ui.editor.MemeEditorState
@@ -42,6 +43,7 @@ fun CreateMemeScreenContent(
     memeTemplatePath: String,
     memeFilePath: String,
     editorState: MemeEditorState,
+    isSaveInProgress: Boolean,
     isUndoAvailable: Boolean,
     isRedoAvailable: Boolean,
     sharedTransitionScope: SharedTransitionScope,
@@ -52,9 +54,11 @@ fun CreateMemeScreenContent(
     onBackClick: () -> Unit,
 ) {
 
-    val bottomBarType by remember {
+    val bottomBarType by remember(isSaveInProgress) {
         derivedStateOf {
-            if (editorState.selectedItem == null) {
+            if (isSaveInProgress) {
+                BottomBarType.SAVE_IN_PROGRESS
+            } else if (editorState.selectedItem == null) {
                 BottomBarType.DEFAULT
             } else {
                 BottomBarType.TEXT_OPTIONS
@@ -64,24 +68,28 @@ fun CreateMemeScreenContent(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.new_meme))
-                },
-                navigationIcon = {
-                    Icon(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .padding(8.dp)
-                            .clickable { onBackClick() },
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors().copy(
-                    containerColor = colorsScheme().surfaceContainerLow
-                ),
-            )
+            if (isSaveInProgress) {
+                null
+            } else {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(text = stringResource(R.string.new_meme))
+                    },
+                    navigationIcon = {
+                        Icon(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .padding(8.dp)
+                                .clickable { onBackClick() },
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors().copy(
+                        containerColor = colorsScheme().surfaceContainerLow
+                    ),
+                )
+            }
         },
         bottomBar = {
             AnimatedContent(
@@ -122,6 +130,7 @@ fun CreateMemeScreenContent(
                                     .height(100.dp)
                             )
                         }
+                    BottomBarType.SAVE_IN_PROGRESS -> SaveProgressBottomBar()
                 }
             }
         }
@@ -140,5 +149,5 @@ fun CreateMemeScreenContent(
 }
 
 private enum class BottomBarType {
-    DEFAULT, TEXT_OPTIONS
+    DEFAULT, TEXT_OPTIONS, SAVE_IN_PROGRESS
 }

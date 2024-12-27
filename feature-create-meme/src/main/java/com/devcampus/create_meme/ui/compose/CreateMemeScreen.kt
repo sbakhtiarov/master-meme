@@ -116,6 +116,7 @@ fun CreateMemeScreen(
                 editorState = editorState,
                 isUndoAvailable = viewModel.undoActions.isNotEmpty(),
                 isRedoAvailable = viewModel.redoActions.isNotEmpty(),
+                isSaveInProgress = viewModel.isSaveInProgress.value,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
                 onBackClick = { sendIntent(OnBackPress) },

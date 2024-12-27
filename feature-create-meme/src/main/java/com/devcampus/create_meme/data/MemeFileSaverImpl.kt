@@ -12,6 +12,7 @@ import com.devcampus.create_meme.domain.Decor
 import com.devcampus.create_meme.domain.MemeFileSaver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
@@ -31,7 +32,7 @@ class MemeFileSaverImpl @Inject constructor(
         decorList: List<Decor>,
         saveToCache: Boolean
     ) = runCatching {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO + NonCancellable) {
 
             val assetName = assetPath.split("/").last()
 

@@ -45,6 +45,9 @@ internal class CreateMemeViewModel @Inject constructor(
 
     val memePath = mutableStateOf<String?>(null)
 
+    var isSaveInProgress = mutableStateOf(false)
+        private set
+
     init {
         handleIntents()
     }
@@ -163,6 +166,9 @@ internal class CreateMemeViewModel @Inject constructor(
         saveToCache: Boolean,
         onSuccess: (String) -> Unit
     ) {
+
+        isSaveInProgress.value = true
+
         viewModelScope.launch {
             memeFileSaver.prepareMemeImage(
                 assetPath = assetPath,
@@ -182,9 +188,11 @@ internal class CreateMemeViewModel @Inject constructor(
                 saveToCache = saveToCache,
             )
                 .onSuccess { path ->
+                    isSaveInProgress.value = false
                     onSuccess(path)
                 }
                 .onFailure {
+                    isSaveInProgress.value = false
                     sendAction(ShowMemeCreateError)
                 }
         }
