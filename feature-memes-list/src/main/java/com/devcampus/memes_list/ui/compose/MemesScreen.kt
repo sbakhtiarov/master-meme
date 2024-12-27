@@ -81,6 +81,8 @@ fun MemesScreen(
 
     MemeTemplatesBottomSheetScaffold(
         bottomSheetState = bottomSheetState,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedContentScope = animatedContentScope,
         onTemplateSelected = {
             showMemeEditor(it)
         }

@@ -180,7 +180,7 @@ fun CreateMemeScreen(
                 .padding(innerPadding),
             templatePath = templateAsset,
             state = editorState,
-            savedMemePath = viewModel.savedMemePath.value,
+            memePath = viewModel.memePath.value ?: templateAsset,
             sharedTransitionScope = sharedTransitionScope,
             animatedContentScope = animatedContentScope,
         )

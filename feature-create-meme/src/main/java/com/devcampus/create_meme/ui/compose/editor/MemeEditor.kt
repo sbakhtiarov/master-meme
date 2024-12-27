@@ -47,7 +47,7 @@ import com.devcampus.create_meme.ui.model.DecorType
 fun MemeEditor(
     templatePath: String,
     state: MemeEditorState,
-    savedMemePath: String,
+    memePath: String,
     modifier: Modifier = Modifier,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
@@ -64,7 +64,7 @@ fun MemeEditor(
             AsyncImage(
                 modifier = Modifier
                     .sharedElement(
-                        sharedTransitionScope.rememberSharedContentState(key = "meme-${savedMemePath}"),
+                        sharedTransitionScope.rememberSharedContentState(key = "meme-${memePath}"),
                         animatedVisibilityScope = animatedContentScope
                     )
                     .align(Alignment.Center)

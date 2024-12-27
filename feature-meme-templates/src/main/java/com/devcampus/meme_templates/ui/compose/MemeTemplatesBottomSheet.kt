@@ -3,7 +3,10 @@ package com.devcampus.meme_templates.ui.compose
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -48,10 +51,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MemeTemplatesBottomSheetScaffold(
     bottomSheetState: SheetState,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     onTemplateSelected: (String) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -66,6 +71,8 @@ fun MemeTemplatesBottomSheetScaffold(
         sheetPeekHeight = 480.dp,
         sheetContent = {
             MemeTemplatesContent(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
                 onSelected = { template ->
                     onTemplateSelected(template)
                     scope.launch { bottomSheetState.hide() }
@@ -104,8 +111,11 @@ fun MemeTemplatesBottomSheetScaffold(
 }
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MemeTemplatesContent(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     onSelected: (String) -> Unit,
     onEnterSearchMode: () -> Job,
 ) {
@@ -173,15 +183,24 @@ fun MemeTemplatesContent(
                         .clip(RoundedCornerShape(16.dp))
                         .aspectRatio(1f)
                         .clickable {
+                            isInSearchMode = false
                             onSelected(template.path)
+                            viewModel.onQueryUpdate("")
                         }
                 ) {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
-                        model = template.path,
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null,
-                    )
+                    with (sharedTransitionScope) {
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .sharedElement(
+                                    sharedTransitionScope.rememberSharedContentState(key = "meme-${template.path}"),
+                                    animatedVisibilityScope = animatedContentScope
+                                ),
+                            model = template.path,
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
         }

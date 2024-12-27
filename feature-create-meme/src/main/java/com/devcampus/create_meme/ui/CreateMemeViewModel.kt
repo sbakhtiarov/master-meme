@@ -43,7 +43,7 @@ internal class CreateMemeViewModel @Inject constructor(
     val undoActions = mutableStateListOf<EditorAction>()
     val redoActions = mutableStateListOf<EditorAction>()
 
-    val savedMemePath = mutableStateOf("")
+    val memePath = mutableStateOf<String?>(null)
 
     init {
         handleIntents()
@@ -66,7 +66,7 @@ internal class CreateMemeViewModel @Inject constructor(
                         density = intent.density,
                         saveToCache = false,
                         onSuccess = {
-                            savedMemePath.value = it
+                            memePath.value = it
                             sendAction(CloseScreen)
                         }
                     )
