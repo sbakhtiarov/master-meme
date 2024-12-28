@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devcampus.create_meme.domain.Decor
 import com.devcampus.create_meme.domain.MemeFileSaver
-import com.devcampus.create_meme.ui.model.DecorType
+import com.devcampus.create_meme.ui.model.UiDecorType
 import com.devcampus.create_meme.ui.model.EditorAction
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -38,7 +38,7 @@ internal class CreateMemeViewModel @Inject constructor(
 
     val actions = _actions.receiveAsFlow()
 
-    val decorItems = mutableStateListOf<MemeDecor>()
+    val decorItems = mutableStateListOf<UiDecor>()
 
     val undoActions = mutableStateListOf<EditorAction>()
     val redoActions = mutableStateListOf<EditorAction>()
@@ -113,12 +113,12 @@ internal class CreateMemeViewModel @Inject constructor(
         }
     }
 
-    private fun addDecor(decor: MemeDecor, undoAction: Boolean = true) {
+    private fun addDecor(decor: UiDecor, undoAction: Boolean = true) {
         decorItems.add(decor)
         updateUndoRedo(EditorAction.DecorAdded(decor), undoAction)
     }
 
-    private fun updateDecor(newDecor: MemeDecor, undoAction: Boolean = true) {
+    private fun updateDecor(newDecor: UiDecor, undoAction: Boolean = true) {
         decorItems.find { it.id == newDecor.id }?.let { decor ->
             decorItems.set(
                 index = decorItems.indexOf(decor),
@@ -175,7 +175,7 @@ internal class CreateMemeViewModel @Inject constructor(
                 editorCanvasSize = SizeF(canvasSize.width, canvasSize.height),
                 decorList = decorItems.map { item ->
                     when (item.type) {
-                        is DecorType.TextDecor -> Decor.TextDecor(
+                        is UiDecorType.TextUiDecor -> Decor.TextDecor(
                             topLeft = item.topLeft,
                             text = item.type.text,
                             fontResId = item.type.fontFamily.fontResId,
@@ -213,8 +213,8 @@ internal sealed interface Intent {
     data object OnBackPress : Intent
     data class OnSaveMeme(val assetPath: String, val canvasSize: Size, val density: Density) : Intent
     data class OnShareMeme(val assetPath: String, val canvasSize: Size, val density: Density) : Intent
-    data class OnDecorAdded(val decor: MemeDecor) : Intent
-    data class OnDecorUpdated(val decor: MemeDecor) : Intent
+    data class OnDecorAdded(val decor: UiDecor) : Intent
+    data class OnDecorUpdated(val decor: UiDecor) : Intent
     data class OnDecorDeleted(val id: String) : Intent
     data class OnDecorMoved(val id: String, val offset: Offset) : Intent
     data object Undo : Intent

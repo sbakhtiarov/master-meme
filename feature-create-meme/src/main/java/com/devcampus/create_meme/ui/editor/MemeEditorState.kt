@@ -17,25 +17,23 @@ import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.toSize
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.common.MemeFontFamily
-import com.devcampus.create_meme.ui.model.AnimatedDecor
-import com.devcampus.create_meme.ui.model.DecorType
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecorType
+import com.devcampus.create_meme.ui.model.UiDecor
 import com.devcampus.create_meme.ui.model.textDecor
-import com.devcampus.create_meme.ui.model.toAnimatedDecor
 import java.util.UUID
 
 class MemeEditorState(
-    val decorItems: List<MemeDecor>,
+    val decorItems: List<UiDecor>,
     val textMeasurer: TextMeasurer,
     val defaultMemeText: String,
     val properties: EditorProperties,
-    val onDecorAdded: (MemeDecor) -> Unit,
+    val onDecorAdded: (UiDecor) -> Unit,
     val onDeleteClick: (String) -> Unit,
     val onDecorMoved: (String, Offset) -> Unit,
-    val onDecorUpdated: (MemeDecor) -> Unit,
+    val onDecorUpdated: (UiDecor) -> Unit,
 ) {
 
-    var selectedItem by mutableStateOf<AnimatedDecor?>(null)
+    var selectedItem by mutableStateOf<UiDecor?>(null)
 
     var isInTextEditMode by mutableStateOf<Boolean>(false)
 
@@ -49,13 +47,13 @@ class MemeEditorState(
         val size = textMeasurer.measure(
             text = defaultMemeText,
             style = TextStyle.Default.copy(
-                fontFamily = DecorType.TextDecor.DefaultFontFamily.fontFamily,
-                fontSize = DecorType.TextDecor.DefaultFontFamily.baseFontSize,
+                fontFamily = UiDecorType.TextUiDecor.DefaultFontFamily.fontFamily,
+                fontSize = UiDecorType.TextUiDecor.DefaultFontFamily.baseFontSize,
             )).size
 
-        val decor = MemeDecor(
+        val decor = UiDecor(
             id = UUID.randomUUID().toString(),
-            type = DecorType.TextDecor(defaultMemeText),
+            type = UiDecorType.TextUiDecor(defaultMemeText),
             topLeft = Offset(
                 x = canvasSize.center.x - size.center.x,
                 y = canvasSize.center.y - size.center.y,
@@ -63,7 +61,7 @@ class MemeEditorState(
             size = size.toSize(),
         )
 
-        selectedItem = decor.toAnimatedDecor()
+        selectedItem = decor
 
         onDecorAdded(decor)
     }
@@ -107,7 +105,7 @@ class MemeEditorState(
                 type = textDecor.copy(fontFamily = font),
                 topLeft = topLeft,
                 size = newSize,
-            ).toAnimatedDecor()
+            )
         }
     }
 
@@ -129,7 +127,7 @@ class MemeEditorState(
                 type = textDecor.copy(fontScale = scale),
                 topLeft = topLeft,
                 size = newSize,
-            ).toAnimatedDecor()
+            )
         }
     }
 
@@ -137,7 +135,7 @@ class MemeEditorState(
         withTextSelection { decor, textDecor ->
             selectedItem = decor.copy(
                 type = textDecor.copy(fontColor = color),
-            ).toAnimatedDecor()
+            )
         }
     }
 
@@ -162,7 +160,7 @@ class MemeEditorState(
                 type = textDecor.copy(text = newText),
                 topLeft = topLeft,
                 size = newSize,
-            ).toAnimatedDecor()
+            )
 
             return true
         }
@@ -185,7 +183,7 @@ class MemeEditorState(
         }
     }
 
-    private fun MemeDecor.measure(
+    private fun UiDecor.measure(
         withText: String? = null,
         withFont: MemeFontFamily? = null,
         withFontScale: Float? = null,
@@ -201,25 +199,25 @@ class MemeEditorState(
             )).size.toSize()
     }
 
-    private inline fun withTextSelection(block: (MemeDecor, DecorType.TextDecor) -> Unit) {
-        selectedItem?.decor?.let { decor ->
+    private inline fun withTextSelection(block: (UiDecor, UiDecorType.TextUiDecor) -> Unit) {
+        selectedItem?.let { decor ->
             decor.textDecor()?.let { textDecor->
                 block(decor, textDecor)
             }
         }
     }
 
-    private inline fun withSelection(block: (MemeDecor) -> Unit) { selectedItem?.decor?.let { block(it) } }
+    private inline fun withSelection(block: (UiDecor) -> Unit) { selectedItem?.let { block(it) } }
 }
 
 @Composable
 fun rememberMemeEditorState(
-    decorItems: List<MemeDecor>,
+    decorItems: List<UiDecor>,
     properties: EditorProperties,
-    onDecorAdded: (MemeDecor) -> Unit,
+    onDecorAdded: (UiDecor) -> Unit,
     onDeleteClick: (String) -> Unit,
     onDecorMoved: (String, Offset) -> Unit,
-    onDecorUpdated: (MemeDecor) -> Unit,
+    onDecorUpdated: (UiDecor) -> Unit,
 ): MemeEditorState {
 
     val textMeasurer = rememberTextMeasurer()

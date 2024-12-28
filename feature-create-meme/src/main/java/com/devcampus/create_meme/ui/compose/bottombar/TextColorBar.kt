@@ -30,16 +30,16 @@ import androidx.compose.ui.unit.dp
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.create_meme.ui.common.MemeColors
-import com.devcampus.create_meme.ui.model.DecorType
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecorType
+import com.devcampus.create_meme.ui.model.UiDecor
 
 @Composable
 fun TextColorBar(
-    decor: MemeDecor,
+    decor: UiDecor,
     onColorSelected: (Color) -> Unit
 ) {
 
-    val textDecor: DecorType.TextDecor = decor.type as DecorType.TextDecor
+    val textDecor: UiDecorType.TextUiDecor = decor.type as UiDecorType.TextUiDecor
 
     val rowState = rememberLazyListState()
 
@@ -102,11 +102,11 @@ fun TextColorBar(
 private fun PreviewTextColorBar() {
     MasterMemeTheme {
         TextColorBar(
-            decor = MemeDecor(
+            decor = UiDecor(
                 id = "",
                 topLeft = Offset(0f, 0f),
                 size = Size(0f, 0f),
-                type = DecorType.TextDecor("")
+                type = UiDecorType.TextUiDecor("")
             ),
             onColorSelected = {}
         )

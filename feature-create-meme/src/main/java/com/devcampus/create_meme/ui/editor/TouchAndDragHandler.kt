@@ -17,9 +17,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
-import com.devcampus.create_meme.ui.model.AnimatedDecor
-import com.devcampus.create_meme.ui.model.MemeDecor
-import com.devcampus.create_meme.ui.model.toAnimatedDecor
+import com.devcampus.create_meme.ui.model.UiDecor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -30,7 +28,7 @@ class TouchAndDragHandler(
 
     private val properties = editor.properties
 
-    var dragItem by mutableStateOf<AnimatedDecor?>(null)
+    var dragItem by mutableStateOf<UiDecor?>(null)
         private set
 
     fun onDragStart(offset: Offset) {
@@ -38,26 +36,26 @@ class TouchAndDragHandler(
         if (dragItem != null) return
 
         with (editor) {
-            dragItem = selectedItem?.decor?.takeIf { it.containsPosition(offset) }?.toAnimatedDecor()
-                ?: editor.decorItems.find { it.containsPosition(offset) }?.toAnimatedDecor()
+            dragItem = selectedItem?.takeIf { it.containsPosition(offset) }
+                ?: editor.decorItems.find { it.containsPosition(offset) }
         }
     }
 
     fun onDrag(dragOffset: Offset) {
-        dragItem?.decor?.let { dragItem ->
+        dragItem?.let { dragItem ->
 
             with (properties) {
 
                 val newTopLeft = dragItem.topLeft + dragOffset
 
-                this@TouchAndDragHandler.dragItem = dragItem.copy(topLeft = newTopLeft).toAnimatedDecor()
+                this@TouchAndDragHandler.dragItem = dragItem.copy(topLeft = newTopLeft)
 
-                editor.selectedItem?.decor?.let { selectedItem ->
+                editor.selectedItem?.let { selectedItem ->
                     if (selectedItem.id == dragItem.id) {
                         // Update selected item if dragging it
                         editor.selectedItem = selectedItem.copy(
                             topLeft = newTopLeft
-                        ).toAnimatedDecor()
+                        )
                     }
                 }
             }
@@ -67,26 +65,25 @@ class TouchAndDragHandler(
     fun onDragEnd() {
         dragItem?.let { dragItem ->
 
-            val decor = dragItem.decor
+            val canvasAdjustedOffset =  dragItem.coerceInCanvas()
 
-            val canvasAdjustedOffset =  decor.coerceInCanvas()
+            if (canvasAdjustedOffset != dragItem.topLeft) {
+                animateDecorPosition(dragItem, canvasAdjustedOffset) {
 
-            if (canvasAdjustedOffset != decor.topLeft) {
-                animateDecorPosition(decor, canvasAdjustedOffset) {
-
-                    editor.selectedItem?.decor?.let { selectedItem ->
-                        if (selectedItem.id == dragItem.decor.id) {
+                    editor.selectedItem?.let { selectedItem ->
+                        if (selectedItem.id == dragItem.id) {
                             editor.selectedItem = selectedItem.copy(
-                                topLeft = canvasAdjustedOffset
-                            ).toAnimatedDecor()
+                                topLeft = canvasAdjustedOffset,
+                                animatedOffset = null,
+                            )
                         }
                     }
 
-                    editor.onDecorMoved(decor.id, canvasAdjustedOffset)
+                    editor.onDecorMoved(dragItem.id, canvasAdjustedOffset)
                     this@TouchAndDragHandler.dragItem = null
                 }
             } else {
-                editor.onDecorMoved(decor.id, decor.topLeft)
+                editor.onDecorMoved(dragItem.id, dragItem.topLeft)
                 this@TouchAndDragHandler.dragItem = null
             }
         }
@@ -97,15 +94,15 @@ class TouchAndDragHandler(
     }
 
 
-    private fun animateDecorPosition(decor: MemeDecor, newOffset: Offset, onComplete: () -> Unit) {
+    private fun animateDecorPosition(decor: UiDecor, newOffset: Offset, onComplete: () -> Unit) {
 
         val offset = Animatable(decor.topLeft, Offset.VectorConverter)
 
-        dragItem = dragItem?.copy(offset = offset)
+        dragItem = dragItem?.copy(animatedOffset = offset)
 
-        if (editor.selectedItem?.decor?.id == dragItem?.decor?.id) {
+        if (editor.selectedItem?.id == dragItem?.id) {
             editor.selectedItem = editor.selectedItem?.copy(
-                offset = offset
+                animatedOffset = offset
             )
         }
 
@@ -119,7 +116,7 @@ class TouchAndDragHandler(
         }
     }
 
-    private fun MemeDecor.coerceInCanvas(): Offset {
+    private fun UiDecor.coerceInCanvas(): Offset {
 
         val left = topLeft.x.coerceIn(
             minimumValue = properties.borderMargin,
@@ -136,9 +133,9 @@ class TouchAndDragHandler(
 
     fun onTap(offset: Offset) {
         with (editor) {
-            selectedItem?.decor?.onTapDelete(offset) { decor ->
+            selectedItem?.onTapDelete(offset) { decor ->
                 animationScope.launch {
-                    editor.selectedItem?.alpha?.animateTo(
+                    editor.selectedItem?.animatedAlpha?.animateTo(
                         targetValue = 0f,
                         animationSpec = tween(200)
                     )
@@ -149,14 +146,14 @@ class TouchAndDragHandler(
                 return
             }
 
-            selectedItem?.decor?.containsPosition(offset) { return }
+            selectedItem?.containsPosition(offset) { return }
 
             selectedItem?.let { confirmChanges() }
 
             val decor = decorItems.find { it.containsPosition(offset) }
 
             if (decor != null) {
-                editor.selectedItem = decor.toAnimatedDecor()
+                editor.selectedItem = decor
             }
 
             isInTextEditMode = false
@@ -167,22 +164,22 @@ class TouchAndDragHandler(
         with (editor) {
             if (!isInTextEditMode) {
 
-                selectedItem?.decor?.containsPosition(offset) { decor ->
+                selectedItem?.containsPosition(offset) { decor ->
                     selectedItem?.let { confirmChanges() }
-                    editor.selectedItem = decor.toAnimatedDecor()
+                    editor.selectedItem = decor
                     isInTextEditMode = true
                     return
                 }
 
                 decorItems.find { it.containsPosition(offset) }?.let { decor ->
-                    editor.selectedItem = decor.toAnimatedDecor()
+                    editor.selectedItem = decor
                     isInTextEditMode = true
                 }
             }
         }
     }
 
-    private fun MemeDecor.isTapOnDeleteButton(offset: Offset): Boolean {
+    private fun UiDecor.isTapOnDeleteButton(offset: Offset): Boolean {
         with (properties) {
             val left = topLeft.x + size.width + borderMargin - deleteIconSize / 2f
             val top = topLeft.y - borderMargin - deleteIconSize / 2f
@@ -193,18 +190,18 @@ class TouchAndDragHandler(
         }
     }
 
-    private inline fun MemeDecor.onTapDelete(offset: Offset, block: (MemeDecor) -> Unit) {
+    private inline fun UiDecor.onTapDelete(offset: Offset, block: (UiDecor) -> Unit) {
         if (isTapOnDeleteButton(offset)) {
             block(this)
         }
     }
 
-    private fun MemeDecor.containsPosition(offset: Offset): Boolean {
+    private fun UiDecor.containsPosition(offset: Offset): Boolean {
         val decorRect = Rect(offset = topLeft, size = size).inflate(2 * properties.borderMargin)
         return decorRect.contains(offset)
     }
 
-    private inline fun MemeDecor.containsPosition(offset: Offset, block: (MemeDecor) -> Unit) {
+    private inline fun UiDecor.containsPosition(offset: Offset, block: (UiDecor) -> Unit) {
         if(containsPosition(offset)) {
             block(this)
         }

@@ -40,7 +40,7 @@ import com.devcampus.create_meme.ui.editor.MemeEditorState
 import com.devcampus.create_meme.ui.editor.handleDragEvents
 import com.devcampus.create_meme.ui.editor.handleTapEvents
 import com.devcampus.create_meme.ui.editor.rememberTouchAndDragHandler
-import com.devcampus.create_meme.ui.model.DecorType
+import com.devcampus.create_meme.ui.model.UiDecorType
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -90,12 +90,12 @@ fun MemeEditor(
         }
 
         if (state.isInTextEditMode) {
-            state.selectedItem?.decor?.let { decor ->
+            state.selectedItem?.let { decor ->
 
                 requireNotNull(decor.topLeft)
                 requireNotNull(decor.size)
 
-                val textDecor = decor.type as DecorType.TextDecor
+                val textDecor = decor.type as UiDecorType.TextUiDecor
 
                 var value by remember {
                     mutableStateOf(

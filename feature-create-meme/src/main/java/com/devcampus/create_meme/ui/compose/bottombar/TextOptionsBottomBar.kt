@@ -42,12 +42,12 @@ import com.devcampus.common_android.ui.conditional
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.R
 import com.devcampus.create_meme.ui.common.MemeFontFamily
-import com.devcampus.create_meme.ui.model.DecorType
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecorType
+import com.devcampus.create_meme.ui.model.UiDecor
 
 @Composable
 fun TextOptionsBottomBar(
-    decor: MemeDecor,
+    decor: UiDecor,
     onFontSelected: (MemeFontFamily) -> Unit,
     onFontScaleSelected: (Float) -> Unit,
     onFontColorSelected: (Color) -> Unit,
@@ -141,7 +141,7 @@ fun TextOptionsBottomBar(
                         .optionButton(
                             isSelected = { selectedButton == EditButton.COLOR },
                             onClick = { toggleSelection(EditButton.COLOR) },
-                            isEnabled = (decor.type as DecorType.TextDecor).fontFamily.colored.not(),
+                            isEnabled = (decor.type as UiDecorType.TextUiDecor).fontFamily.colored.not(),
                         ),
                     painter = painterResource(R.drawable.ic_color_picker),
                     contentDescription = null,
@@ -196,11 +196,11 @@ private fun Modifier.optionButton(
 private fun PreviewTextOptionsBar() {
     MasterMemeTheme {
         TextOptionsBottomBar(
-            decor = MemeDecor(
+            decor = UiDecor(
                 id = "",
                 topLeft = Offset(0f, 0f),
                 size = Size(0f, 0f),
-                type = DecorType.TextDecor("")
+                type = UiDecorType.TextUiDecor("")
             ),
             onFontSelected = {},
             onFontColorSelected = {},

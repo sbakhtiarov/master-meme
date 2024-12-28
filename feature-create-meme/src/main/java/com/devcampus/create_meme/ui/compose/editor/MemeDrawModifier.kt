@@ -16,15 +16,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import com.devcampus.create_meme.ui.editor.EditorProperties
-import com.devcampus.create_meme.ui.model.AnimatedDecor
-import com.devcampus.create_meme.ui.model.DecorType
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecor
+import com.devcampus.create_meme.ui.model.UiDecorType
 
 @Composable
 fun Modifier.drawMemeDecor(
-    selectedItem: AnimatedDecor?,
-    dragItem: AnimatedDecor?,
-    decorItems: List<MemeDecor>,
+    selectedItem: UiDecor?,
+    dragItem: UiDecor?,
+    decorItems: List<UiDecor>,
     editorProperties: EditorProperties,
     isInTextEditMode: Boolean,
 ): Modifier {
@@ -36,7 +35,7 @@ fun Modifier.drawMemeDecor(
         drawContent()
 
         // Draw dragged item if it is not selected
-        if (dragItem?.decor?.id != selectedItem?.decor?.id) {
+        if (dragItem?.id != selectedItem?.id) {
             dragItem?.let { decor ->
                 drawAnimatedDecor(
                     animatedDecor = decor,
@@ -61,8 +60,8 @@ fun Modifier.drawMemeDecor(
 
         // Draw all other items
         decorItems
-            .filter { it.id != dragItem?.decor?.id }
-            .filter { it.id != selectedItem?.decor?.id }
+            .filter { it.id != dragItem?.id }
+            .filter { it.id != selectedItem?.id }
             .forEach { decor -> drawDecor(
                 decor = decor,
                 properties = editorProperties,
@@ -74,24 +73,24 @@ fun Modifier.drawMemeDecor(
 }
 
 private fun DrawScope.drawAnimatedDecor(
-    animatedDecor: AnimatedDecor,
+    animatedDecor: UiDecor,
     properties: EditorProperties,
     drawDeleteButton: Boolean = true,
     drawBorder: Boolean,
     textMeasurer: TextMeasurer,
 ) {
 
-    val decor = if (animatedDecor.offset != null) {
-        animatedDecor.decor.copy(topLeft = animatedDecor.offset.value)
+    val decor = if (animatedDecor.animatedOffset != null) {
+        animatedDecor.copy(topLeft = animatedDecor.animatedOffset.value)
     } else {
-        animatedDecor.decor
+        animatedDecor
     }
 
-    drawDecor(decor, properties, drawDeleteButton, drawBorder, textMeasurer, animatedDecor.alpha.value)
+    drawDecor(decor, properties, drawDeleteButton, drawBorder, textMeasurer, animatedDecor.animatedAlpha.value)
 }
 
 private fun DrawScope.drawDecor(
-    decor: MemeDecor,
+    decor: UiDecor,
     properties: EditorProperties,
     drawDeleteButton: Boolean = true,
     drawBorder: Boolean,
@@ -112,7 +111,7 @@ private fun DrawScope.drawDecor(
 }
 
 private fun DrawScope.drawDecorBorder(
-    decor: MemeDecor,
+    decor: UiDecor,
     properties: EditorProperties,
     alpha: Float,
 ) {
@@ -145,7 +144,7 @@ private fun DrawScope.drawDecorBorder(
 }
 
 private fun DrawScope.drawDeleteButton(
-    decor: MemeDecor,
+    decor: UiDecor,
     properties: EditorProperties,
     alpha: Float,
 ) {
@@ -163,12 +162,12 @@ private fun DrawScope.drawDeleteButton(
 }
 
 private fun DrawScope.drawDecorType(
-    decor: MemeDecor,
+    decor: UiDecor,
     textMeasurer: TextMeasurer,
     alpha: Float,
 ) {
     when (decor.type) {
-        is DecorType.TextDecor -> {
+        is UiDecorType.TextUiDecor -> {
 
             val style = TextStyle.Default.copy(
                 fontFamily = decor.type.fontFamily.fontFamily,

@@ -20,12 +20,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.R
-import com.devcampus.create_meme.ui.model.DecorType
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecorType
+import com.devcampus.create_meme.ui.model.UiDecor
 
 @Composable
 fun TextSizeBar(
-    decor: MemeDecor,
+    decor: UiDecor,
     onFontScaleChanged: (Float) -> Unit,
 ) {
     Row(
@@ -37,7 +37,7 @@ fun TextSizeBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        val textDecor: DecorType.TextDecor = decor.type as DecorType.TextDecor
+        val textDecor: UiDecorType.TextUiDecor = decor.type as UiDecorType.TextUiDecor
 
         Icon(
             modifier = Modifier.size(44.dp).padding(8.dp),
@@ -66,11 +66,11 @@ fun TextSizeBar(
 private fun PreviewTextSizeBar() {
     MasterMemeTheme {
         TextSizeBar(
-            decor = MemeDecor(
+            decor = UiDecor(
                 id = "",
                 topLeft = Offset(0f, 0f),
                 size = Size(0f, 0f),
-                type = DecorType.TextDecor("")
+                type = UiDecorType.TextUiDecor("")
             ),
             onFontScaleChanged = {},
         )

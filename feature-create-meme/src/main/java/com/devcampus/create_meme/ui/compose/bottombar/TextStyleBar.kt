@@ -28,22 +28,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devcampus.common_android.ui.conditional
-import com.devcampus.common_android.ui.theme.DefaultMemeColorScheme
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
 import com.devcampus.create_meme.ui.common.MemeFontFamily
 import com.devcampus.create_meme.ui.common.MemeFonts
-import com.devcampus.create_meme.ui.model.DecorType
-import com.devcampus.create_meme.ui.model.MemeDecor
+import com.devcampus.create_meme.ui.model.UiDecorType
+import com.devcampus.create_meme.ui.model.UiDecor
 
 @Composable
 fun TextStyleBar(
-    decor: MemeDecor,
+    decor: UiDecor,
     onFontSelected: (MemeFontFamily) -> Unit,
 ) {
 
-    val decorType: DecorType.TextDecor = decor.type as DecorType.TextDecor
+    val uiDecorType: UiDecorType.TextUiDecor = decor.type as UiDecorType.TextUiDecor
 
-    var selection by remember { mutableStateOf(decorType.fontFamily.name) }
+    var selection by remember { mutableStateOf(uiDecorType.fontFamily.name) }
 
     val rowState = rememberLazyListState()
 
@@ -112,11 +111,11 @@ private fun FontButton(font: MemeFontFamily, isSelected: () -> Boolean, onClick:
 private fun PreviewTextStyleBar() {
     MasterMemeTheme {
         TextStyleBar(
-            decor = MemeDecor(
+            decor = UiDecor(
                 id = "",
                 topLeft = Offset(0f, 0f),
                 size = Size(0f, 0f),
-                type = DecorType.TextDecor("")
+                type = UiDecorType.TextUiDecor("")
             ),
             onFontSelected = {}
         )
