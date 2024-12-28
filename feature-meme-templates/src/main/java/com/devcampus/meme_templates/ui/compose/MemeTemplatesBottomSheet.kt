@@ -19,10 +19,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +63,8 @@ fun MemeTemplatesBottomSheetScaffold(
 
     BackHandler(enabled = bottomSheetState.isVisible) { scope.launch { bottomSheetState.hide() } }
 
+    val scrollToTopOnClose by remember { derivedStateOf { !bottomSheetState.isVisible } }
+
     BottomSheetScaffoldWithScrim(
         bottomSheetState = bottomSheetState,
         sheetPeekHeight = 480.dp,
@@ -67,6 +72,7 @@ fun MemeTemplatesBottomSheetScaffold(
             MemeTemplatesContent(
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
+                scrollToTop = scrollToTopOnClose,
                 onSelected = { template ->
                     onTemplateSelected(template)
                     scope.launch { bottomSheetState.hide() }
@@ -86,6 +92,7 @@ fun MemeTemplatesBottomSheetScaffold(
 fun MemeTemplatesContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
+    scrollToTop: Boolean,
     onSelected: (String) -> Unit,
     onEnterSearchMode: () -> Job,
 ) {
@@ -142,7 +149,10 @@ fun MemeTemplatesContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val gridState = rememberLazyGridState()
+
         LazyVerticalGrid(
+            state = gridState,
             columns = GridCells.Fixed(columns),
             contentPadding = PaddingValues(start = 22.dp, top = 22.dp, end = 22.dp, bottom = 72.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -178,6 +188,10 @@ fun MemeTemplatesContent(
                     }
                 }
             }
+        }
+
+        if (scrollToTop) {
+            LaunchedEffect(Unit) { gridState.scrollToItem(0) }
         }
     }
 }
