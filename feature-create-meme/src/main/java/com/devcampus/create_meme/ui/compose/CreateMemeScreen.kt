@@ -18,6 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.devcampus.common_android.ui.BottomSheetScaffoldWithScrim
 import com.devcampus.common_android.ui.MemeShare.showShareDialog
 import com.devcampus.common_android.ui.rememberSheetState
@@ -33,7 +36,6 @@ import com.devcampus.create_meme.ui.compose.dialog.ExitConfirmationDialog
 import com.devcampus.create_meme.ui.compose.dialog.SaveAndShareDialog
 import com.devcampus.create_meme.ui.editor.rememberEditorProperties
 import com.devcampus.create_meme.ui.editor.rememberMemeEditorState
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.devcampus.common_android.R as CommonR
 
@@ -47,6 +49,7 @@ fun CreateMemeScreen(
 ) {
 
     val context = LocalContext.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
     val viewModel : CreateMemeViewModel = hiltViewModel()
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
@@ -140,12 +143,14 @@ fun CreateMemeScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.actions.collectLatest { action ->
-            when (action) {
-                ShowLeaveConfirmation -> showLeaveConfirmation = true
-                CloseScreen -> onClickUp()
-                ShowMemeCreateError -> showError(context)
-                is Share -> showShareDialog(context, listOf(action.path))
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.actions.collect { action ->
+                when (action) {
+                    ShowLeaveConfirmation -> showLeaveConfirmation = true
+                    CloseScreen -> onClickUp()
+                    ShowMemeCreateError -> showError(context)
+                    is Share -> showShareDialog(context, listOf(action.path))
+                }
             }
         }
     }

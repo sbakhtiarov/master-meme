@@ -39,7 +39,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.devcampus.common_android.ui.MemeShare.showShareDialog
 import com.devcampus.common_android.ui.theme.colorsScheme
 import com.devcampus.meme_templates.ui.compose.MemeTemplatesBottomSheetScaffold
@@ -54,7 +57,6 @@ import com.devcampus.memes_list.ui.ShowDeletionConfirmation
 import com.devcampus.memes_list.ui.ShowErrorMessage
 import com.devcampus.memes_list.ui.ShowMeme
 import com.devcampus.memes_list.ui.isInSelectionMode
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.devcampus.common_android.R as CommonR
 
@@ -74,6 +76,7 @@ fun MemesScreen(
     val sendIntent: (Intent) -> Unit = remember { { viewModel.onIntent(it) } }
 
     val context = LocalContext.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberStandardBottomSheetState(initialValue = SheetValue.Hidden, skipHiddenState = false)
@@ -182,12 +185,14 @@ fun MemesScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.actions.collectLatest { action ->
-            when (action) {
-                is ShowDeletionConfirmation -> showDeleteConfirmation = true
-                is ShowErrorMessage -> showError(context)
-                is Share -> showShareDialog(context, action.paths)
-                is ShowMeme -> showMemePreview(action.meme.path)
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.actions.collect { action ->
+                when (action) {
+                    is ShowDeletionConfirmation -> showDeleteConfirmation = true
+                    is ShowErrorMessage -> showError(context)
+                    is Share -> showShareDialog(context, action.paths)
+                    is ShowMeme -> showMemePreview(action.meme.path)
+                }
             }
         }
     }
