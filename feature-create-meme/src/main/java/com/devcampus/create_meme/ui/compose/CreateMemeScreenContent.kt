@@ -23,9 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -54,16 +51,10 @@ fun CreateMemeScreenContent(
     onBackClick: () -> Unit,
 ) {
 
-    val bottomBarType by remember(isSaveInProgress) {
-        derivedStateOf {
-            if (isSaveInProgress) {
-                BottomBarType.SAVE_IN_PROGRESS
-            } else if (editorState.selectedItem == null) {
-                BottomBarType.DEFAULT
-            } else {
-                BottomBarType.TEXT_OPTIONS
-            }
-        }
+    val bottomBarType = when {
+        isSaveInProgress -> BottomBarType.SAVE_IN_PROGRESS
+        editorState.selectedItem == null -> BottomBarType.DEFAULT
+        else -> BottomBarType.TEXT_OPTIONS
     }
 
     Scaffold(
@@ -102,36 +93,15 @@ fun CreateMemeScreenContent(
                 }
 
             ) { bottomBarType ->
-                when (bottomBarType) {
-                    BottomBarType.DEFAULT ->
-                        DefaultBottomBar(
-                            isUndoAvailable = isUndoAvailable,
-                            isRedoAvailable = isRedoAvailable,
-                            onAddClick = { editorState.addTextDecor() },
-                            onSaveClick = { onSaveClick() },
-                            onUndoClick = { onUndoClick() },
-                            onRedoClick = { onRedoClick() },
-                        )
-
-                    BottomBarType.TEXT_OPTIONS ->
-                        if (editorState.selectedItem != null) {
-                            TextOptionsBottomBar(
-                                decor = editorState.selectedItem ?: error("No selection"),
-                                onFontSelected = { editorState.setFont(it) },
-                                onFontScaleSelected = { editorState.setFontScale(it) },
-                                onFontColorSelected = { editorState.setFontColor(it) },
-                                onCancel = { editorState.cancelChanges() },
-                                onConfirm = { editorState.confirmChanges() }
-                            )
-                        } else {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                            )
-                        }
-                    BottomBarType.SAVE_IN_PROGRESS -> SaveProgressBottomBar()
-                }
+                BottomBar(
+                    bottomBarType = bottomBarType,
+                    editorState = editorState,
+                    isUndoAvailable = isUndoAvailable,
+                    isRedoAvailable = isRedoAvailable,
+                    onSaveClick = onSaveClick,
+                    onUndoClick = onUndoClick,
+                    onRedoClick = onRedoClick
+                )
             }
         }
     ) { innerPadding ->
@@ -145,6 +115,49 @@ fun CreateMemeScreenContent(
             sharedTransitionScope = sharedTransitionScope,
             animatedContentScope = animatedContentScope,
         )
+    }
+}
+
+@Composable
+private fun BottomBar(
+    bottomBarType: BottomBarType,
+    editorState: MemeEditorState,
+    isUndoAvailable: Boolean,
+    isRedoAvailable: Boolean,
+    onSaveClick: () -> Unit,
+    onUndoClick: () -> Unit,
+    onRedoClick: () -> Unit
+) {
+    when (bottomBarType) {
+        BottomBarType.DEFAULT ->
+            DefaultBottomBar(
+                isUndoAvailable = isUndoAvailable,
+                isRedoAvailable = isRedoAvailable,
+                onAddClick = { editorState.addTextDecor() },
+                onSaveClick = { onSaveClick() },
+                onUndoClick = { onUndoClick() },
+                onRedoClick = { onRedoClick() },
+            )
+
+        BottomBarType.TEXT_OPTIONS ->
+            if (editorState.selectedItem != null) {
+                TextOptionsBottomBar(
+                    decor = editorState.selectedItem ?: error("No selection"),
+                    onFontSelected = { editorState.setFont(it) },
+                    onFontScaleSelected = { editorState.setFontScale(it) },
+                    onFontColorSelected = { editorState.setFontColor(it) },
+                    onCancel = { editorState.cancelChanges() },
+                    onConfirm = { editorState.confirmChanges() }
+                )
+            } else {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                )
+            }
+
+        BottomBarType.SAVE_IN_PROGRESS -> SaveProgressBottomBar()
     }
 }
 

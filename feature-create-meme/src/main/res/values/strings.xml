@@ -12,4 +12,5 @@
     <string name="save_to_device_message">Save created meme in the Files of your device</string>
     <string name="share_the_meme">Share the meme</string>
     <string name="share_the_meme_message">Share your meme or open it in the other App</string>
+    <string name="preparing_your_meme_image">Preparing your meme image…</string>
 </resources>

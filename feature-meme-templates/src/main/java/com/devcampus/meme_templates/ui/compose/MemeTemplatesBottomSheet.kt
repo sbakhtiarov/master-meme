@@ -111,6 +111,7 @@ fun MemeTemplatesContent(
 
     BackHandler(enabled = isInSearchMode) { isInSearchMode = false }
 
+    // Remember visible sheet height for drawing gradient
     var height by remember { mutableFloatStateOf(0f) }
 
     Column(
@@ -190,6 +191,7 @@ fun MemeTemplatesContent(
             }
         }
 
+        // Reset list position when bottom sheet is closed
         if (scrollToTop) {
             LaunchedEffect(Unit) { gridState.scrollToItem(0) }
         }

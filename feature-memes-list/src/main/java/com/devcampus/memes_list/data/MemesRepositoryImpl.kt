@@ -18,9 +18,15 @@ internal class MemesRepositoryImpl @Inject constructor(
 
     private companion object {
         private const val MEMES_FOLDER = "memes"
+
+        // Supported meme image extensions
         private val MEMES_IMAGE_EXT = listOf(".jpg", ".png", ".webp")
     }
 
+    /**
+     * Use observer to get updates on the content of the memes folder.
+     * Return a list of actual meme files on each update.
+     */
     override fun getMemes(): Flow<List<MemeFile>> =
         callbackFlow {
 
@@ -32,6 +38,7 @@ internal class MemesRepositoryImpl @Inject constructor(
                     memesDirectory.mkdir()
                 }
 
+                // Start with sending actual file list
                 send(memesDirectory.allMemeFiles())
 
                 memesDirectory.startWatching {

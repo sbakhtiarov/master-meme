@@ -10,10 +10,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.devcampus.common_android.ui.theme.colorsScheme
 
+/**
+ * Draw gradients on top of composable.
+ * @param height optional height of the target view. Used when gradient needs to be placed higher than the view bottom
+ * (e.g. when drawing on partially expanded bottom sheet)
+ */
 @Composable
-fun Modifier.drawListGradient(
-    height: Float? = null
-) = composed {
+fun Modifier.drawListGradient(height: Float? = null) = composed {
 
     val scrimColor = colorsScheme().surface
 

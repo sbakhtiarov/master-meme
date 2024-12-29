@@ -19,6 +19,14 @@ import com.devcampus.create_meme.ui.editor.EditorProperties
 import com.devcampus.create_meme.ui.model.UiDecor
 import com.devcampus.create_meme.ui.model.UiDecorType
 
+/**
+ * Modifier for drawing decorations on top of the composable (image)
+ * @param selectedItem currently selected decoration (drawn with frame and delete button)
+ * @param dragItem currently dragged item
+ * @param decorItems list of all decorations to draw
+ * @param editorProperties [EditorProperties] for size and color values
+ * @param isInTextEditMode true if user is editing text of the [selectedItem]. Hides delete button
+ */
 @Composable
 fun Modifier.drawMemeDecor(
     selectedItem: UiDecor?,
@@ -80,6 +88,7 @@ private fun DrawScope.drawAnimatedDecor(
     textMeasurer: TextMeasurer,
 ) {
 
+    // Use animated decor offset if it is not null
     val decor = if (animatedDecor.animatedOffset != null) {
         animatedDecor.copy(topLeft = animatedDecor.animatedOffset.value)
     } else {
@@ -168,29 +177,37 @@ private fun DrawScope.drawDecorType(
 ) {
     when (decor.type) {
         is UiDecorType.TextUiDecor -> {
-
-            val style = TextStyle.Default.copy(
-                fontFamily = decor.type.fontFamily.fontFamily,
-                fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale
-            )
-
-            val layoutResult = textMeasurer.measure(decor.type.text, style)
-
-            drawText(
-                textLayoutResult = layoutResult,
-                color = decor.type.fontColor.copy(alpha = alpha),
-                topLeft = decor.topLeft,
-                drawStyle = Fill,
-            )
-
-            if (decor.type.fontFamily.isStroke) {
-                drawText(
-                    textLayoutResult = layoutResult,
-                    color = decor.type.strokeColor.copy(alpha = alpha),
-                    topLeft = decor.topLeft,
-                    drawStyle = Stroke(width = 4f),
-                )
-            }
+            drawTextDecor(decor.type, textMeasurer, alpha, decor)
         }
+    }
+}
+
+private fun DrawScope.drawTextDecor(
+    type: UiDecorType.TextUiDecor,
+    textMeasurer: TextMeasurer,
+    alpha: Float,
+    decor: UiDecor
+) {
+    val style = TextStyle.Default.copy(
+        fontFamily = type.fontFamily.fontFamily,
+        fontSize = type.fontFamily.baseFontSize * type.fontScale
+    )
+
+    val layoutResult = textMeasurer.measure(type.text, style)
+
+    drawText(
+        textLayoutResult = layoutResult,
+        color = type.fontColor.copy(alpha = alpha),
+        topLeft = decor.topLeft,
+        drawStyle = Fill,
+    )
+
+    if (type.fontFamily.isStroke) {
+        drawText(
+            textLayoutResult = layoutResult,
+            color = type.strokeColor.copy(alpha = alpha),
+            topLeft = decor.topLeft,
+            drawStyle = Stroke(width = 4f),
+        )
     }
 }

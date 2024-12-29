@@ -22,6 +22,20 @@ import com.devcampus.create_meme.ui.model.UiDecor
 import com.devcampus.create_meme.ui.model.textDecor
 import java.util.UUID
 
+/**
+ * Holds UI state for decorations.
+ * Keeps reference to list of all decorations.
+ * Holds selected item and handles selected item properties change.
+ *
+ * @param decorItems decorations list
+ * @param textMeasurer measurer for sizing and placing text
+ * @param defaultMemeText default text for new text decoration
+ * @property [EditorProperties] size and color values
+ * @param onDecorAdded called when new decoration item was added
+ * @param onDeleteClick called when decor delete button is clicked
+ * @param onDecorMoved called when decor position is changed
+ * @param onDecorUpdated called when decor properties updated
+ */
 class MemeEditorState(
     val decorItems: List<UiDecor>,
     val textMeasurer: TextMeasurer,
@@ -33,6 +47,10 @@ class MemeEditorState(
     val onDecorUpdated: (UiDecor) -> Unit,
 ) {
 
+    /**
+     * Item selected by user. All decoration property changes (font, size, color) are done for this item and can be cancelled
+     * or confirmed by the user.
+     */
     var selectedItem by mutableStateOf<UiDecor?>(null)
 
     var isInTextEditMode by mutableStateOf<Boolean>(false)
@@ -66,10 +84,9 @@ class MemeEditorState(
         onDecorAdded(decor)
     }
 
-    fun cancelChanges() {
-        selectedItem = null
-    }
-
+    /**
+     * Confirm all changes for [selectedItem]
+     */
     fun confirmChanges(clearSelection: Boolean = true) {
         withSelection { selectedItem ->
 
@@ -84,6 +101,10 @@ class MemeEditorState(
                 isInTextEditMode = false
             }
         }
+    }
+
+    fun cancelChanges() {
+        selectedItem = null
     }
 
     /**
@@ -109,6 +130,11 @@ class MemeEditorState(
         }
     }
 
+    /**
+     * Adjust font scale.
+     * @param scale required scale.
+     * - If decoration size/position exceed screen borders the scale update is declined
+     */
     fun setFontScale(scale: Float) {
         withTextSelection { decor, textDecor ->
 
@@ -139,6 +165,12 @@ class MemeEditorState(
         }
     }
 
+    /**
+     * Request text update for the selected decoration.
+     * @return
+     * - true if update is allowed
+     * - false if update is forbidden (due to size / position restrictions)
+     */
     fun onTextChange(newText: String): Boolean {
 
         if (isInTextEditMode.not()) return false
@@ -168,9 +200,14 @@ class MemeEditorState(
         return false
     }
 
+    /**
+     * Finish text edit mode.
+     * Save changes and clear [isInTextEditMode] flag
+     */
     fun finishEditMode() {
         withTextSelection { decor, textDecor ->
 
+            // delete decoration if user accepts
             if (textDecor.text.isEmpty()) {
                 onDeleteClick(decor.id)
                 selectedItem = null

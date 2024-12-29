@@ -26,6 +26,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.launch
 
+/**
+ *  BottomSheetScaffold wrapper with new features:
+ *    - Show background scrim when sheet is opened
+ *    - Close bottom sheet on tap outside
+ *    - Close bottom sheet on tap back
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetScaffoldWithScrim(
@@ -51,6 +57,7 @@ fun BottomSheetScaffoldWithScrim(
 
                 content()
 
+                // Show scrim if bottom sheet is visible or state is changing
                 AnimatedVisibility(
                     bottomSheetState.isVisible || bottomSheetState.currentValue != bottomSheetState.targetValue,
                     enter = fadeIn(),
@@ -74,6 +81,10 @@ fun BottomSheetScaffoldWithScrim(
     )
 }
 
+/**
+ *  Used instead of 'rememberStandardBottomSheetState' to pass
+ *  skipPartiallyExpanded parameter to SheetState constructor
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberSheetState(

@@ -11,10 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devcampus.common_android.ui.theme.MasterMemeTheme
+import com.devcampus.create_meme.R
 
 @Composable
 fun SaveProgressBottomBar() {
@@ -35,7 +37,7 @@ fun SaveProgressBottomBar() {
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                text = "Preparing your meme image...",
+                text = stringResource(R.string.preparing_your_meme_image),
                 fontSize = 12.sp
             )
         }

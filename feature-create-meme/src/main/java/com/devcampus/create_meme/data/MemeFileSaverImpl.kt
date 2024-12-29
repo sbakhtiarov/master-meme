@@ -18,6 +18,9 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Draws decorations on top of the image and saves the resulting image.
+ */
 class MemeFileSaverImpl @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : MemeFileSaver {
@@ -26,6 +29,13 @@ class MemeFileSaverImpl @Inject constructor(
         private const val MEMES_FOLDER = "memes"
     }
 
+    /**
+     * @param assetPath path to the meme template image to draw on
+     * @param editorCanvasSize size of the screen canvas used to place decorations
+     * @param decorList list of decorations to draw
+     * @param saveToCache pass true to save image in cache. Used when image only shared without saving to
+     * internal gallery.
+     */
     override suspend fun prepareMemeImage(
         assetPath: String,
         editorCanvasSize: SizeF,

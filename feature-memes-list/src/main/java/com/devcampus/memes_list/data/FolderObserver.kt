@@ -4,7 +4,9 @@ import android.os.Build
 import android.os.FileObserver
 import java.io.File
 
-
+/**
+ * Observe application memes folder
+ */
 @Suppress("DEPRECATION")
 internal fun File.startWatching(onUpdate: () -> Unit) =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

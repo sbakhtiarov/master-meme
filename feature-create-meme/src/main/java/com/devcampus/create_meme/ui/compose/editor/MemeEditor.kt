@@ -42,6 +42,9 @@ import com.devcampus.create_meme.ui.editor.handleTapEvents
 import com.devcampus.create_meme.ui.editor.rememberTouchAndDragHandler
 import com.devcampus.create_meme.ui.model.UiDecorType
 
+/**
+ * Draw meme template image and decorations
+ */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MemeEditor(
@@ -53,13 +56,12 @@ fun MemeEditor(
     animatedContentScope: AnimatedContentScope,
 ) {
 
+    // Save position of the meme image to place TextField correctly for text input
     var imagePosition by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     val touchAndDragHandler = rememberTouchAndDragHandler(state)
 
-    Box(
-        modifier = modifier,
-    ) {
+    Box(modifier = modifier) {
         with (sharedTransitionScope) {
             AsyncImage(
                 modifier = Modifier
@@ -90,80 +92,7 @@ fun MemeEditor(
         }
 
         if (state.isInTextEditMode) {
-            state.selectedItem?.let { decor ->
-
-                requireNotNull(decor.topLeft)
-                requireNotNull(decor.size)
-
-                val textDecor = decor.type as UiDecorType.TextUiDecor
-
-                var value by remember {
-                    mutableStateOf(
-                        TextFieldValue(
-                            text = textDecor.text,
-                            selection = TextRange(0, textDecor.text.length)
-                        )
-                    )
-                }
-
-                val focusRequester = remember { FocusRequester() }
-
-                val fieldOffset = with(LocalDensity.current) { 16.dp.toPx() }.toInt()
-
-                val size = with(LocalDensity.current) {
-                    DpSize(
-                        width = decor.size.width.toDp() + 32.dp,
-                        height = decor.size.height.toDp() + 32.dp
-                    )
-                }
-
-                TextField(
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .offset {
-                            val x = decor.topLeft.x.toInt()
-                            val y = decor.topLeft.y.toInt()
-
-                            IntOffset(
-                                x = x - fieldOffset,
-                                y = y + (imagePosition?.positionInParent()?.y?.toInt() ?: 0) - fieldOffset
-                            )
-                        }
-                        .size(size),
-                    value = value,
-                    onValueChange = {
-                        if (state.onTextChange(it.text)) {
-                            value = it
-                        }
-                    },
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            state.finishEditMode()
-                        }
-                    ),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        capitalization = KeyboardCapitalization.Characters
-                    ),
-                    singleLine = true,
-                    textStyle = TextStyle.Default.copy(
-                        fontFamily = decor.type.fontFamily.fontFamily,
-                        fontSize = decor.type.fontFamily.baseFontSize * decor.type.fontScale,
-                        color = Color.Transparent,
-                    ),
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Transparent,
-                        unfocusedTextColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    )
-                )
-
-                LaunchedEffect(Unit) { focusRequester.requestFocus() }
-            }
+            MemeTextInput(state, imagePosition)
         }
     }
 }
